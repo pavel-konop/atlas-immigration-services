@@ -1,8 +1,6 @@
-import { AudienceJourneyScroller } from "@/components/sections/AudienceJourneyScroller";
-import { Hero } from "@/components/sections/Hero";
+import { ContinuousStorySection } from "@/components/sections/ContinuousStorySection";
 import { InsightsPreview } from "@/components/sections/InsightsPreview";
 import { Process } from "@/components/sections/Process";
-import { RouteMapSection } from "@/components/sections/RouteMapSection";
 import { ShowcaseMarquee } from "@/components/sections/ShowcaseMarquee";
 import { WhyAtlas } from "@/components/sections/WhyAtlas";
 import { getSiteContent } from "@/lib/admin/content";
@@ -16,13 +14,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
-      <RouteMapSection />
-      <AudienceJourneyScroller
-        eyebrow={siteContent.audienceJourney.eyebrow}
-        title={siteContent.audienceJourney.title}
-        slides={siteContent.audienceJourney.slides}
-      />
+      <ContinuousStorySection slides={siteContent.audienceJourney.slides} />
       <ShowcaseMarquee
         eyebrow={siteContent.showcase.eyebrow}
         title={siteContent.showcase.title}
