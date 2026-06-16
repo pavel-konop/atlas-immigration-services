@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { services } from "@/content/services";
+import { getSiteContent, mergeServiceOverride } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ServiceCard } from "@/components/ui/ServiceCard";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMetadata({
   title: "Services",
@@ -10,7 +13,10 @@ export const metadata: Metadata = pageMetadata({
   path: "/services"
 });
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const siteContent = await getSiteContent();
+  const editableServices = services.map((service) => mergeServiceOverride(service, siteContent));
+
   return (
     <section className="bg-atlas-cream py-18">
       <div className="container-shell">
@@ -21,7 +27,7 @@ export default function ServicesPage() {
           align="center"
         />
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
+          {editableServices.map((service) => (
             <ServiceCard key={service.slug} service={service} />
           ))}
         </div>

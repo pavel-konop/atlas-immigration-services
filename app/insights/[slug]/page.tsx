@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getArticle, getArticles } from "@/lib/content/articles";
+import { getSiteContent, mergeArticleOverride } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 import type { RouteParams } from "@/types/site";
 
@@ -13,7 +14,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: RouteParams<"slug">): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getArticle(slug).catch(() => null);
+  const siteContent = await getSiteContent();
+  const found = await getArticle(slug).catch(() => null);
+  const article = found ? mergeArticleOverride(found, siteContent) : null;
   if (!article) return {};
 
   return pageMetadata({
@@ -25,7 +28,9 @@ export async function generateMetadata({ params }: RouteParams<"slug">): Promise
 
 export default async function ArticlePage({ params }: RouteParams<"slug">) {
   const { slug } = await params;
-  const article = await getArticle(slug).catch(() => null);
+  const siteContent = await getSiteContent();
+  const found = await getArticle(slug).catch(() => null);
+  const article = found ? mergeArticleOverride(found, siteContent) : null;
   if (!article) notFound();
 
   return (
@@ -45,3 +50,4 @@ export default async function ArticlePage({ params }: RouteParams<"slug">) {
     </article>
   );
 }
+export const dynamic = "force-dynamic";

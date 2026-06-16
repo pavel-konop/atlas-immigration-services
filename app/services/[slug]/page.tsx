@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { getService, services } from "@/content/services";
+import { getSiteContent, mergeServiceOverride } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 import type { RouteParams } from "@/types/site";
 import { ButtonLink } from "@/components/ui/ButtonLink";
@@ -14,7 +15,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: RouteParams<"slug">): Promise<Metadata> {
   const { slug } = await params;
-  const service = getService(slug);
+  const siteContent = await getSiteContent();
+  const found = getService(slug);
+  const service = found ? mergeServiceOverride(found, siteContent) : undefined;
 
   if (!service) return {};
 
@@ -27,10 +30,13 @@ export async function generateMetadata({ params }: RouteParams<"slug">): Promise
 
 export default async function ServiceDetailPage({ params }: RouteParams<"slug">) {
   const { slug } = await params;
-  const service = getService(slug);
+  const siteContent = await getSiteContent();
+  const found = getService(slug);
+  const service = found ? mergeServiceOverride(found, siteContent) : undefined;
   if (!service) notFound();
   const Icon = service.icon;
-  const related = services.filter((item) => item.slug !== service.slug && item.category === service.category).slice(0, 3);
+  const editableServices = services.map((item) => mergeServiceOverride(item, siteContent));
+  const related = editableServices.filter((item) => item.slug !== service.slug && item.category === service.category).slice(0, 3);
 
   return (
     <>
@@ -101,3 +107,4 @@ export default async function ServiceDetailPage({ params }: RouteParams<"slug">)
     </>
   );
 }
+export const dynamic = "force-dynamic";

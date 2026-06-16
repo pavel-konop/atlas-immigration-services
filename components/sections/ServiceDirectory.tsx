@@ -1,10 +1,13 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { services } from "@/content/services";
+import { getSiteContent, mergeServiceOverride } from "@/lib/admin/content";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
-export function ServiceDirectory() {
+export async function ServiceDirectory() {
   const categories = ["Immigration Services", "Corporate Services"] as const;
+  const siteContent = await getSiteContent();
+  const editableServices = services.map((service) => mergeServiceOverride(service, siteContent));
 
   return (
     <section className="bg-atlas-cream py-18">
@@ -20,7 +23,7 @@ export function ServiceDirectory() {
             <div key={category} className="rounded-md border border-atlas-line bg-white p-5 shadow-sm">
               <h3 className="mb-4 text-lg font-semibold text-atlas-navy">{category}</h3>
               <div className="grid gap-3">
-                {services
+                {editableServices
                   .filter((service) => service.category === category)
                   .map((service) => {
                     const Icon = service.icon;

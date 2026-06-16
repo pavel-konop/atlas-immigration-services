@@ -92,3 +92,20 @@ svg {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes showcase-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-showcase-marquee {
+  animation: showcase-marquee 54s linear infinite;
+}
+
+.animate-showcase-marquee:hover {
+  animation-play-state: paused;
+}

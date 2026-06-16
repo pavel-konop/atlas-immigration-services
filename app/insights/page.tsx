@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getArticles } from "@/lib/content/articles";
+import { getSiteContent, mergeArticleOverride } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -13,6 +14,8 @@ export const metadata: Metadata = pageMetadata({
 
 export default async function InsightsPage() {
   const articles = await getArticles();
+  const siteContent = await getSiteContent();
+  const editableArticles = articles.map((article) => mergeArticleOverride(article, siteContent));
 
   return (
     <section className="bg-atlas-cream py-18">
@@ -24,7 +27,7 @@ export default async function InsightsPage() {
           align="center"
         />
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {articles.map((article) => (
+          {editableArticles.map((article) => (
             <Link
               key={article.slug}
               href={`/insights/${article.slug}`}
@@ -43,3 +46,4 @@ export default async function InsightsPage() {
     </section>
   );
 }
+export const dynamic = "force-dynamic";

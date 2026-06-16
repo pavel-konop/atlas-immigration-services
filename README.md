@@ -15,11 +15,14 @@ Open `http://localhost:3000`.
 
 ```bash
 npm run lint
+npm run typecheck
 npm run build
 ```
 
 ## Editing Workflow
 
+- Admin content manager: visit `/admin`, log in with `ADMIN_PASSWORD`, edit the JSON, save, preview, and log out.
+- Admin-backed content: `content/admin/site-content.json`
 - Contact details: `content/config/business.ts`
 - Navigation and CTA wording: `content/config/navigation.ts`
 - Language readiness: `content/config/languages.ts`
@@ -29,6 +32,9 @@ npm run build
 - FAQs: `content/faqs/index.ts`
 - Articles: add or edit Markdown files in `content/articles/`
 - Approved AI knowledge: `content/knowledge/approved-guidance.ts`
+
+The admin file controls the continuous showcase rail, the horizontal audience journey, service overrides, and article overrides.
+It is file-backed for this build. For immutable production hosting, move this content store to a database or managed CMS while keeping the same content shape.
 
 Article files use front matter:
 
@@ -45,6 +51,7 @@ featured: true
 ## Routes
 
 - `/`
+- `/admin`
 - `/services`
 - `/services/[slug]`
 - `/about`
@@ -57,7 +64,7 @@ featured: true
 
 ## Brand Assets
 
-Current brand assets are copied into `public/brand/`. The header uses a replaceable SVG placeholder mark at `public/brand/atlas-mark.svg`; official logo source files can replace this later without changing page code.
+Current brand assets are copied into `public/brand/`. The header uses `public/brand/atlas-logo-small.jpg`; official logo source files can replace this later without changing page code.
 
 ## AI Roadmap
 

@@ -1,7 +1,4 @@
-import { ArrowRight, MessageCircle } from "lucide-react";
 import Image from "next/image";
-import { business } from "@/content/config/business";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export function Hero() {
   return (
@@ -19,24 +16,10 @@ export function Hero() {
       <div className="container-shell relative z-10 flex min-h-[calc(100vh-5rem)] items-center py-14 md:py-18">
         <div className="max-w-[680px]">
           <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-atlas-gold">Singapore immigration and corporate services</p>
-          <h1 className="font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]">
-            Your trusted partner for building a future in <span className="text-atlas-gold">Singapore</span>
+          <h1 className="max-w-[620px] font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]">
+            Your trusted <span className="text-atlas-gold">Singapore</span> partner
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-            Immigration and corporate services guidance for individuals, entrepreneurs, and businesses. Personal touch.
-            Professional care. Singapore expertise.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/contact">
-              Speak with a Consultant <ArrowRight aria-hidden="true" className="h-4 w-4" />
-            </ButtonLink>
-            <a
-              href={business.whatsappHref}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-atlas-line bg-white px-5 py-3 text-sm font-semibold text-atlas-navy transition hover:border-atlas-gold hover:text-atlas-gold"
-            >
-              <MessageCircle aria-hidden="true" className="h-4 w-4" /> WhatsApp Us
-            </a>
-          </div>
+          <p className="mt-6 max-w-lg text-lg leading-8 text-slate-600">Immigration and corporate services guidance with a personal, practical touch.</p>
         </div>
       </div>
     </section>
