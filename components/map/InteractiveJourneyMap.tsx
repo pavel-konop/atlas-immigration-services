@@ -94,6 +94,8 @@ const stages = [
   { label: "Services", progress: 0.84 }
 ] as const;
 
+type OriginPoint = (typeof originPoints)[number];
+
 export function InteractiveJourneyMap() {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
@@ -103,9 +105,9 @@ export function InteractiveJourneyMap() {
   });
   const progress = useSpring(scrollYProgress, { stiffness: 80, damping: 26, mass: 0.35 });
 
-  const mapScale = useTransform(progress, [0, 0.34, 0.68, 1], reduceMotion ? [1, 1, 1, 1] : [1.03, 1.13, 1.34, 1.34]);
-  const mapX = useTransform(progress, [0, 0.34, 0.68, 1], reduceMotion ? [0, 0, 0, 0] : [26, -10, -126, -126]);
-  const mapY = useTransform(progress, [0, 0.34, 0.68, 1], reduceMotion ? [0, 0, 0, 0] : [0, -14, -64, -64]);
+  const mapScale = useTransform(progress, [0, 0.28, 0.6, 1], reduceMotion ? [1, 1, 1, 1] : [1.03, 1.16, 1.43, 1.5]);
+  const mapX = useTransform(progress, [0, 0.28, 0.6, 1], reduceMotion ? [0, 0, 0, 0] : [26, -36, -174, -212]);
+  const mapY = useTransform(progress, [0, 0.28, 0.6, 1], reduceMotion ? [0, 0, 0, 0] : [0, -22, -82, -94]);
   const routeLength = useTransform(progress, [0.18, 0.46], [0, 1]);
   const originOpacity = useTransform(progress, [0, 0.12, 0.7], [0.65, 1, 0.55]);
   const singaporeScale = useTransform(progress, [0.36, 0.64], [0.75, 1.08]);
@@ -129,7 +131,7 @@ export function InteractiveJourneyMap() {
             className="absolute inset-0"
             style={{ scale: mapScale, x: mapX, y: mapY, opacity: mapFade, transformOrigin: `${singapore.x}px ${singapore.y}px` }}
           >
-            <JourneySvg routeLength={routeLength} originOpacity={originOpacity} singaporeScale={singaporeScale} />
+            <JourneySvg routeLength={routeLength} originOpacity={originOpacity} singaporeScale={singaporeScale} mapProgress={progress} />
           </motion.div>
 
           <div className="container-shell relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-between py-6 md:py-10">
@@ -138,17 +140,17 @@ export function InteractiveJourneyMap() {
               <p className="mt-4 max-w-sm text-base font-semibold leading-7 text-white">From global origins to a confident Singapore start.</p>
             </div>
             <div className="relative z-30 mb-2 flex flex-wrap gap-2 md:flex-nowrap">
-                {stages.map((stage, index) => (
-                  <button
-                    key={stage.label}
-                    type="button"
-                    onClick={() => goToStage(stage.progress)}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/18 bg-white/8 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white/86 backdrop-blur transition hover:border-atlas-gold hover:text-atlas-gold"
-                  >
-                    <span className="text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
-                    {stage.label}
-                  </button>
-                ))}
+              {stages.map((stage, index) => (
+                <button
+                  key={stage.label}
+                  type="button"
+                  onClick={() => goToStage(stage.progress)}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/18 bg-white/8 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white/86 backdrop-blur transition hover:border-atlas-gold hover:text-atlas-gold"
+                >
+                  <span className="text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
+                  {stage.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -160,11 +162,13 @@ export function InteractiveJourneyMap() {
 function JourneySvg({
   routeLength,
   originOpacity,
-  singaporeScale
+  singaporeScale,
+  mapProgress
 }: {
   routeLength: MotionValue<number>;
   originOpacity: MotionValue<number>;
   singaporeScale: MotionValue<number>;
+  mapProgress: MotionValue<number>;
 }) {
   return (
     <svg viewBox="0 0 1200 640" role="img" aria-labelledby="journeyTitle journeyDesc" className="h-full w-full">
@@ -196,27 +200,16 @@ function JourneySvg({
         <path d={landPath} fill="#12365F" opacity="0.92" />
         <path d={landPath} fill="url(#atlas-map-dots)" opacity="0.95" />
         <path d={countryPath} fill="none" stroke="#254D75" strokeWidth="0.6" opacity="0.62" />
-        {originPoints.map((origin) => {
-          const label = origin.label;
-          return (
-            <motion.g key={origin.key} opacity={originOpacity}>
-              <motion.path
-                d={routePath([origin.x, origin.y], [singapore.x, singapore.y])}
-                fill="none"
-                stroke="#D9A528"
-                strokeWidth="4"
-                strokeLinecap="round"
-                pathLength={routeLength}
-                filter="url(#softGlow)"
-              />
-              <circle cx={origin.x} cy={origin.y} r="6" fill="#D9A528" stroke="#FFF7DF" strokeWidth="1.8" />
-              <circle cx={origin.x} cy={origin.y} r="14" fill="none" stroke="#D9A528" strokeWidth="1.6" opacity="0.32" />
-              <text x={origin.labelX} y={origin.labelY} textAnchor={origin.anchor} fill="#FFFFFF" fontSize="14" fontWeight="800">
-                {label}
-              </text>
-            </motion.g>
-          );
-        })}
+        {originPoints.map((origin, index) => (
+          <RouteArc
+            key={origin.key}
+            index={index}
+            origin={origin}
+            routeLength={routeLength}
+            originOpacity={originOpacity}
+            mapProgress={mapProgress}
+          />
+        ))}
         <motion.g style={{ scale: singaporeScale, transformOrigin: `${singapore.x}px ${singapore.y}px` }}>
           <circle cx={singapore.x} cy={singapore.y} r="58" fill="url(#atlas-anchor-glow)" />
           <circle cx={singapore.x} cy={singapore.y} r="18" fill="#D9A528" stroke="#FFF7DF" strokeWidth="3" />
@@ -230,8 +223,70 @@ function JourneySvg({
   );
 }
 
+function RouteArc({
+  origin,
+  index,
+  routeLength,
+  originOpacity,
+  mapProgress
+}: {
+  origin: OriginPoint;
+  index: number;
+  routeLength: MotionValue<number>;
+  originOpacity: MotionValue<number>;
+  mapProgress: MotionValue<number>;
+}) {
+  const from: [number, number] = [origin.x, origin.y];
+  const to: [number, number] = [singapore.x, singapore.y];
+  const labelOpacity = useTransform(mapProgress, [0.1 + index * 0.035, 0.19 + index * 0.035, 0.74], [0, 1, 0.72]);
+  const particleProgress = useTransform(routeLength, (value) => clamp((value - index * 0.07) / 0.62, 0, 1));
+  const particleOpacity = useTransform(particleProgress, [0, 0.08, 0.82, 1], [0, 1, 1, 0]);
+  const particleX = useTransform(particleProgress, (value) => quadraticPoint(from, to, value).x);
+  const particleY = useTransform(particleProgress, (value) => quadraticPoint(from, to, value).y);
+
+  return (
+    <motion.g opacity={originOpacity}>
+      <motion.path
+        d={routePath(from, to)}
+        fill="none"
+        stroke="#D9A528"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        pathLength={routeLength}
+        filter="url(#softGlow)"
+      />
+      <motion.circle cx={particleX} cy={particleY} r="4.5" fill="#F5C94B" opacity={particleOpacity} filter="url(#softGlow)" />
+      <circle cx={origin.x} cy={origin.y} r="6" fill="#D9A528" stroke="#FFF7DF" strokeWidth="1.8" />
+      <circle cx={origin.x} cy={origin.y} r="14" fill="none" stroke="#D9A528" strokeWidth="1.6" opacity="0.32" />
+      <motion.text
+        x={origin.labelX}
+        y={origin.labelY}
+        textAnchor={origin.anchor}
+        fill="#FFFFFF"
+        fontSize="14"
+        fontWeight="800"
+        opacity={labelOpacity}
+      >
+        {origin.label}
+      </motion.text>
+    </motion.g>
+  );
+}
+
 function routePath(from: [number, number], to: [number, number]) {
   const midX = (from[0] + to[0]) / 2;
   const midY = Math.min(from[1], to[1]) - Math.max(70, Math.abs(from[0] - to[0]) * 0.18);
   return `M ${from[0]} ${from[1]} Q ${midX} ${midY} ${to[0]} ${to[1]}`;
+}
+
+function quadraticPoint(from: [number, number], to: [number, number], t: number) {
+  const midX = (from[0] + to[0]) / 2;
+  const midY = Math.min(from[1], to[1]) - Math.max(70, Math.abs(from[0] - to[0]) * 0.18);
+  const x = (1 - t) ** 2 * from[0] + 2 * (1 - t) * t * midX + t ** 2 * to[0];
+  const y = (1 - t) ** 2 * from[1] + 2 * (1 - t) * t * midY + t ** 2 * to[1];
+  return { x, y };
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
