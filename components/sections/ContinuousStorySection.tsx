@@ -60,13 +60,20 @@ const graticulePath = pathGenerator(geoGraticule10()) || "";
 const singaporePoint = projection([103.8198, 1.3521]) || [660, 392];
 const singapore = { x: singaporePoint[0], y: singaporePoint[1] };
 
-const originPoints = [
+const standardOriginPoints = [
   { key: "India", label: "India", lngLat: [78.9629, 20.5937] as [number, number], dx: -18, dy: -26, anchor: "end" as const },
   { key: "China", label: "China", lngLat: [104.1954, 35.8617] as [number, number], dx: -14, dy: -26, anchor: "end" as const },
   { key: "Japan", label: "Japan", lngLat: [138.2529, 36.2048] as [number, number], dx: -18, dy: -24, anchor: "end" as const },
   { key: "Philippines", label: "Philippines", lngLat: [121.774, 12.8797] as [number, number], dx: 18, dy: -20, anchor: "end" as const },
   { key: "Indonesia", label: "Indonesia", lngLat: [113.9213, -0.7893] as [number, number], dx: 22, dy: 36, anchor: "start" as const }
-].map((origin) => {
+];
+
+const v1AdditionalOriginPoints = [
+  { key: "Central Asia", label: "Central Asia", lngLat: [58, 31] as [number, number], dx: -18, dy: -26, anchor: "end" as const, radius: 20 },
+  { key: "Africa", label: "Africa", lngLat: [38, -15] as [number, number], dx: 18, dy: -20, anchor: "start" as const, radius: 22 }
+];
+
+const originPoints = [...standardOriginPoints, ...v1AdditionalOriginPoints].map((origin) => {
   const point = projection(origin.lngLat) || [0, 0];
   return {
     ...origin,
@@ -77,10 +84,8 @@ const originPoints = [
   };
 });
 
-const supplementalDots = [
-  { key: "central-asia", lngLat: [58, 31] as [number, number], radius: 20 },
-  { key: "africa", lngLat: [38, -15] as [number, number], radius: 22 }
-].map((dot) => {
+const standardOriginPointCount = standardOriginPoints.length;
+const supplementalDots = v1AdditionalOriginPoints.map((dot) => {
   const point = projection(dot.lngLat) || [0, 0];
   return {
     ...dot,
@@ -103,8 +108,10 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   const reduceMotion = useReducedMotion();
   const enabledSlides = slides.filter((slide) => slide.enabled).slice(0, 3);
   const tone: StoryTone = variant === "v2" ? "modern" : variant === "v3" ? "transition" : "classic";
+  const isV1 = variant === "v1";
   const isModern = tone === "modern";
   const isTransition = tone === "transition";
+  const useLightHeroText = isV1 || isModern || isTransition;
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"]
@@ -115,25 +122,48 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   const heroY = useTransform(progress, isTransition ? [0, 0.46] : [0, 0.36], [0, -64]);
   const heroImageOpacity = useTransform(progress, [0, 0.28, 0.46], [1, 0.72, 0.18]);
   const navyOpacity = useTransform(progress, [0, 0.26, 0.5], [0.2, 0.78, 1]);
-  const mapOpacity = useTransform(progress, [0.18, 0.34, 0.82], [0, 1, 0.82]);
-  const mapScale = useTransform(progress, [0.26, 0.58, 1], reduceMotion ? [1, 1, 1] : [1.02, 1.28, 1.38]);
-  const mapX = useTransform(progress, [0.26, 0.58, 1], reduceMotion ? [0, 0, 0] : [20, -92, -130]);
-  const mapY = useTransform(progress, [0.26, 0.58, 1], reduceMotion ? [0, 0, 0] : [0, -48, -58]);
+  const mapOpacity = useTransform(progress, isV1 ? [0.18, 0.34, 0.62, 0.76] : [0.18, 0.34, 0.82], isV1 ? [0, 1, 1, 0] : [0, 1, 0.82]);
+  const mapScale = useTransform(
+    progress,
+    isV1 ? [0.26, 0.58, 0.7, 0.78] : [0.26, 0.58, 1],
+    isV1 ? (reduceMotion ? [1, 1, 1, 1] : [1.02, 1.28, 2.95, 3.45]) : reduceMotion ? [1, 1, 1] : [1.02, 1.28, 1.38]
+  );
+  const mapX = useTransform(progress, isV1 ? [0.26, 0.58, 0.78] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [20, -92, -160] : [20, -92, -130]);
+  const mapY = useTransform(progress, isV1 ? [0.26, 0.58, 0.78] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [0, -48, -104] : [0, -48, -58]);
+  const mapBlur = useTransform(progress, isV1 ? [0.6, 0.76] : [0, 1], isV1 ? ["blur(0px)", "blur(8px)"] : ["blur(0px)", "blur(0px)"]);
   const routeLength = useTransform(progress, [0.34, 0.56], [0, 1]);
   const pathOpacity = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [0, 1]);
   const pathY = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [96, 0]);
+  const mapInfoOpacity = useTransform(progress, [0.34, 0.48, 0.6], [0, 1, 0]);
+  const audienceDeckOpacity = useTransform(progress, [0.68, 0.78], [0, 1]);
+  const audienceDeckScale = useTransform(progress, [0.68, 0.78], [1.16, 1]);
+  const audienceDeckX = useTransform(progress, (value) => {
+    const transitionProgress = Math.max(0, (value - 0.82) / 0.18);
+    const slideIndex = Math.min(transitionProgress * Math.max(enabledSlides.length - 1, 0), Math.max(enabledSlides.length - 1, 0));
+    return `${-slideIndex * 100}%`;
+  });
 
   return (
     <section ref={sectionRef} data-atlas-continuous-story="true" data-atlas-story-variant={variant} className="relative bg-atlas-navy">
-      <div className="h-[360vh] min-h-[2500px]">
+      <div className={isV1 ? "h-[520vh] min-h-[3600px]" : "h-[360vh] min-h-[2500px]"}>
         <div className="sticky top-20 min-h-[calc(100vh-5rem)] overflow-hidden text-white">
           <motion.div className="absolute inset-0" style={{ opacity: heroImageOpacity }}>
             <Image src="/images/atlas-singapore-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[62%_center]" />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.74)_28%,rgba(255,255,255,0.1)_58%,rgba(7,29,58,0.42)_100%)]" />
           </motion.div>
           <motion.div className="absolute inset-0 bg-atlas-navy" style={{ opacity: navyOpacity }} />
-          <motion.div className="absolute inset-0" style={{ opacity: mapOpacity, scale: mapScale, x: mapX, y: mapY, transformOrigin: `${singapore.x}px ${singapore.y}px` }}>
-            <StoryMap routeLength={routeLength} tone={tone} />
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              opacity: mapOpacity,
+              scale: mapScale,
+              x: mapX,
+              y: mapY,
+              filter: mapBlur,
+              transformOrigin: `${(singapore.x / 1200) * 100}% ${(singapore.y / 640) * 100}%`
+            }}
+          >
+            <StoryMap routeLength={routeLength} tone={tone} variant={variant} />
           </motion.div>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_52%,rgba(217,165,40,0.14),transparent_28%),linear-gradient(90deg,rgba(7,29,58,0.92)_0%,rgba(7,29,58,0.7)_28%,rgba(7,29,58,0.16)_58%,rgba(7,29,58,0)_100%)]" />
           {isTransition ? (
@@ -145,53 +175,93 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
           <div className="container-shell relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-between py-8">
             <motion.div className="max-w-[680px] pt-8" style={{ opacity: heroOpacity, y: heroY }}>
               <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-atlas-gold">Singapore immigration and corporate services</p>
-              <h1 className={isModern || isTransition ? "max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]" : "max-w-[650px] font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]"}>
+              <h1 className={useLightHeroText ? "max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]" : "max-w-[650px] font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]"}>
                 Your trusted <span className={isModern ? "text-cyan-200" : "text-atlas-gold"}>Singapore</span> partner
               </h1>
-              <p className={isModern || isTransition ? "mt-6 max-w-lg text-lg leading-8 text-white/86 drop-shadow-[0_2px_12px_rgba(0,0,0,0.34)]" : "mt-6 max-w-lg text-lg leading-8 text-slate-700"}>
+              <p className={useLightHeroText ? "mt-6 max-w-lg text-lg leading-8 text-white/86 drop-shadow-[0_2px_12px_rgba(0,0,0,0.34)]" : "mt-6 max-w-lg text-lg leading-8 text-slate-700"}>
                 Immigration and corporate services guidance with a personal, practical touch.
               </p>
             </motion.div>
 
-            <motion.div className="max-w-xl" style={{ opacity: mapOpacity }}>
+            <motion.div className="max-w-xl" style={{ opacity: isV1 ? mapInfoOpacity : mapOpacity }}>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-atlas-gold">Singapore journey map</p>
               <p className="mt-4 max-w-sm text-base font-semibold leading-7 text-white">From global origins to a confident Singapore start.</p>
             </motion.div>
 
-            <motion.div className="grid gap-4 md:grid-cols-3" style={{ opacity: pathOpacity, y: pathY }}>
-              {enabledSlides.map((slide, index) => (
-                <Link
-                  key={slide.id}
-                  href={slide.href}
-                  className={
-                    isTransition
-                      ? "group grid min-h-[260px] gap-4 rounded-md border border-cyan-200/22 bg-[#0f1621]/88 p-4 text-white shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold md:grid-cols-[0.48fr_0.52fr] md:items-center"
-                      : "group grid min-h-[235px] gap-4 rounded-md border border-white/14 bg-white/10 p-4 text-white shadow-soft backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold"
-                  }
-                >
-                  <span className={isTransition ? "relative block min-h-[210px] overflow-hidden rounded-md bg-white/10" : "relative block aspect-[16/9] overflow-hidden rounded-md bg-white/10"}>
-                    <Image src={slide.image} alt="" fill sizes="33vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                  </span>
-                  <span>
-                    <span className="text-sm font-bold text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="mt-2 block font-serif text-2xl leading-tight">{slide.label}</span>
-                    <span className="mt-2 block text-sm leading-6 text-white/72">{slide.subtitle}</span>
-                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold">
-                      Explore <ArrowRight aria-hidden="true" className="h-4 w-4 transition group-hover:translate-x-1" />
+            {isV1 ? (
+              <motion.div
+                className="absolute inset-y-0 z-20 overflow-hidden"
+                style={{ left: "calc((100% - 100vw) / 2)", width: "100vw", opacity: audienceDeckOpacity, scale: audienceDeckScale }}
+              >
+                <AudienceDeckBackground />
+                <motion.div className="relative flex h-full" style={{ x: audienceDeckX }}>
+                  {enabledSlides.map((slide, index) => (
+                    <article key={slide.id} className="h-full min-h-full min-w-full shrink-0">
+                      <div className="container-shell grid h-full min-h-full items-center gap-6 py-6 text-atlas-navy md:grid-cols-[1.08fr_0.92fr] md:gap-12 md:py-8">
+                        <div className="relative h-[32vh] min-h-[220px] overflow-hidden bg-atlas-navy shadow-[0_24px_90px_rgba(7,29,58,0.2)] md:h-[min(68vh,680px)] md:min-h-[320px]">
+                          <Image src={slide.image} alt="" fill sizes="(min-width: 768px) 54vw, 100vw" className="object-cover" />
+                          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(6,22,45,0.68)_100%)]" />
+                          <span className="absolute bottom-6 left-6 text-xs font-bold uppercase tracking-[0.22em] text-[#f4f8fb] md:bottom-10 md:left-10">{String(index + 1).padStart(2, "0")} / {slide.label}</span>
+                        </div>
+                        <div className="max-w-xl">
+                          <p className="text-xs font-bold uppercase tracking-[0.22em] text-atlas-gold">Your Singapore path</p>
+                          <h2 className="mt-4 font-serif text-4xl leading-[0.95] md:text-7xl">{slide.title}</h2>
+                          <p className="mt-5 text-base leading-7 text-[#3a526a] md:text-xl md:leading-8">{slide.subtitle}</p>
+                          <p className="mt-5 hidden max-w-lg text-base leading-7 text-[#4c6074] md:block">{slide.description}</p>
+                          <div className="mt-4 flex flex-wrap gap-2 md:mt-6">
+                            {slide.services.slice(0, 2).map((service) => (
+                              <span key={service} className="rounded-full border border-atlas-navy/18 px-3 py-1.5 text-sm text-[#3a526a]">
+                                {service}
+                              </span>
+                            ))}
+                          </div>
+                          <Link href={slide.href} className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-atlas-navy transition hover:text-atlas-gold">
+                            Explore {slide.label} <ArrowRight aria-hidden="true" className="size-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div className="grid gap-4 md:grid-cols-3" style={{ opacity: pathOpacity, y: pathY }}>
+                {enabledSlides.map((slide, index) => (
+                  <Link
+                    key={slide.id}
+                    href={slide.href}
+                    className={
+                      isTransition
+                        ? "group grid min-h-[260px] gap-4 rounded-md border border-cyan-200/22 bg-[#0f1621]/88 p-4 text-white shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold md:grid-cols-[0.48fr_0.52fr] md:items-center"
+                        : "group grid min-h-[235px] gap-4 rounded-md border border-white/14 bg-white/10 p-4 text-white shadow-soft backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold"
+                    }
+                  >
+                    <span className={isTransition ? "relative block min-h-[210px] overflow-hidden rounded-md bg-white/10" : "relative block aspect-[16/9] overflow-hidden rounded-md bg-white/10"}>
+                      <Image src={slide.image} alt="" fill sizes="33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                     </span>
-                  </span>
-                </Link>
-              ))}
-            </motion.div>
+                    <span>
+                      <span className="text-sm font-bold text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="mt-2 block font-serif text-2xl leading-tight">{slide.label}</span>
+                      <span className="mt-2 block text-sm leading-6 text-white/72">{slide.subtitle}</span>
+                      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold">
+                        Explore <ArrowRight aria-hidden="true" className="h-4 w-4 transition group-hover:translate-x-1" />
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </motion.div>
+            )}
 
-            <div className="flex flex-wrap gap-2">
-              {storySteps.map((step, index) => (
-                <span key={step} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/18 bg-white/8 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white/86 backdrop-blur">
-                  <span className="text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
-                  {step}
-                </span>
-              ))}
-            </div>
+            {!isV1 ? (
+              <div className="flex flex-wrap gap-2">
+                {storySteps.map((step, index) => (
+                  <span key={step} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/18 bg-white/8 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white/86 backdrop-blur">
+                    <span className="text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
+                    {step}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -199,10 +269,11 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   );
 }
 
-function StoryMap({ routeLength, tone }: { routeLength: MotionValue<number>; tone: StoryTone }) {
+function StoryMap({ routeLength, tone, variant }: { routeLength: MotionValue<number>; tone: StoryTone; variant: StoryVariant }) {
   const modern = tone === "modern";
   const transition = tone === "transition";
   const mapDotPattern = modern ? "story-modern-dots" : "story-map-dots";
+  const visibleOriginPoints = variant === "v1" ? originPoints : originPoints.slice(0, standardOriginPointCount);
 
   return (
     <svg viewBox="0 0 1200 640" aria-hidden="true" className="h-full w-full">
@@ -251,14 +322,16 @@ function StoryMap({ routeLength, tone }: { routeLength: MotionValue<number>; ton
       <path d={landPath} fill={modern ? "#0F3558" : "#12365F"} opacity={modern ? "0.74" : "0.92"} />
       <path d={landPath} fill={`url(#${mapDotPattern})`} opacity={modern ? "0.8" : "0.95"} />
       <path d={countryPath} fill="none" stroke={modern ? "#2AD4FF" : "#254D75"} strokeWidth={modern ? "0.5" : "0.6"} opacity={modern ? "0.34" : "0.62"} />
-      {supplementalDots.map((dot) => (
-        <g key={dot.key} opacity={modern ? "0.82" : "0.52"}>
-          <circle cx={dot.x} cy={dot.y} r={dot.radius} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="2.2" strokeDasharray={modern ? "16 7" : "none"} />
-          <circle cx={dot.x} cy={dot.y} r={dot.radius + 7} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="1" opacity="0.24" />
-          <circle cx={dot.x} cy={dot.y} r="4" fill={modern ? "#23D4FF" : "#1DBFEA"} opacity="0.26" />
-        </g>
-      ))}
-      {originPoints.map((origin) => (
+      {variant !== "v1"
+        ? supplementalDots.map((dot) => (
+            <g key={dot.key} opacity={modern ? "0.82" : "0.52"}>
+              <circle cx={dot.x} cy={dot.y} r={dot.radius} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="2.2" strokeDasharray={modern ? "16 7" : "none"} />
+              <circle cx={dot.x} cy={dot.y} r={dot.radius + 7} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="1" opacity="0.24" />
+              <circle cx={dot.x} cy={dot.y} r="4" fill={modern ? "#23D4FF" : "#1DBFEA"} opacity="0.26" />
+            </g>
+          ))
+        : null}
+      {visibleOriginPoints.map((origin) => (
         <g key={origin.key}>
           <motion.path
             d={routePath([origin.x, origin.y], [singapore.x, singapore.y])}
@@ -293,6 +366,16 @@ function StoryMap({ routeLength, tone }: { routeLength: MotionValue<number>; ton
         </text>
       </g>
     </svg>
+  );
+}
+
+function AudienceDeckBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#eaf2f7]">
+      <div className="absolute inset-0 opacity-65 [background-image:linear-gradient(rgba(7,29,58,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(7,29,58,0.08)_1px,transparent_1px)] [background-size:5rem_5rem]" />
+      <div className="absolute inset-y-0 left-[12%] w-px bg-atlas-navy/[0.05]" />
+      <div className="absolute inset-y-0 right-[18%] w-px bg-atlas-gold/10" />
+    </div>
   );
 }
 
