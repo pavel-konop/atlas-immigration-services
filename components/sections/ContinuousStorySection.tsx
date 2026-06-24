@@ -100,7 +100,7 @@ type StoryTone = "classic" | "modern" | "transition";
 
 export const ContinuousStorySection = dynamic(() => Promise.resolve(ContinuousStoryExperience), {
   ssr: false,
-  loading: () => <section className="min-h-[calc(100vh-5rem)] bg-atlas-navy" />
+  loading: () => <section className="min-h-screen bg-atlas-navy" />
 });
 
 function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: AudienceJourneySlide[]; variant?: StoryVariant }) {
@@ -122,31 +122,26 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   const heroY = useTransform(progress, isTransition ? [0, 0.46] : [0, 0.36], [0, -64]);
   const heroImageOpacity = useTransform(progress, [0, 0.28, 0.46], [1, 0.72, 0.18]);
   const navyOpacity = useTransform(progress, [0, 0.26, 0.5], [0.2, 0.78, 1]);
-  const mapOpacity = useTransform(progress, isV1 ? [0.18, 0.34, 0.62, 0.76] : [0.18, 0.34, 0.82], isV1 ? [0, 1, 1, 0] : [0, 1, 0.82]);
+  const mapOpacity = useTransform(progress, isV1 ? [0.18, 0.34, 0.58, 0.68] : [0.18, 0.34, 0.82], isV1 ? [0, 1, 1, 0] : [0, 1, 0.82]);
   const mapScale = useTransform(
     progress,
-    isV1 ? [0.26, 0.58, 0.7, 0.78] : [0.26, 0.58, 1],
-    isV1 ? (reduceMotion ? [1, 1, 1, 1] : [1.02, 1.28, 2.95, 3.45]) : reduceMotion ? [1, 1, 1] : [1.02, 1.28, 1.38]
+    isV1 ? [0.26, 0.55, 0.62, 0.68] : [0.26, 0.58, 1],
+    isV1 ? (reduceMotion ? [1, 1, 1, 1] : [1.02, 1.28, 2.75, 3.25]) : reduceMotion ? [1, 1, 1] : [1.02, 1.28, 1.38]
   );
-  const mapX = useTransform(progress, isV1 ? [0.26, 0.58, 0.78] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [20, -92, -160] : [20, -92, -130]);
-  const mapY = useTransform(progress, isV1 ? [0.26, 0.58, 0.78] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [0, -48, -104] : [0, -48, -58]);
-  const mapBlur = useTransform(progress, isV1 ? [0.6, 0.76] : [0, 1], isV1 ? ["blur(0px)", "blur(8px)"] : ["blur(0px)", "blur(0px)"]);
+  const mapX = useTransform(progress, isV1 ? [0.26, 0.55, 0.68] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [20, -92, -150] : [20, -92, -130]);
+  const mapY = useTransform(progress, isV1 ? [0.26, 0.55, 0.68] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [0, -48, -96] : [0, -48, -58]);
+  const mapBlur = useTransform(progress, isV1 ? [0.58, 0.68] : [0, 1], isV1 ? ["blur(0px)", "blur(8px)"] : ["blur(0px)", "blur(0px)"]);
   const routeLength = useTransform(progress, [0.34, 0.56], [0, 1]);
   const pathOpacity = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [0, 1]);
   const pathY = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [96, 0]);
   const mapInfoOpacity = useTransform(progress, [0.34, 0.48, 0.6], [0, 1, 0]);
-  const audienceDeckOpacity = useTransform(progress, [0.68, 0.78], [0, 1]);
-  const audienceDeckScale = useTransform(progress, [0.68, 0.78], [1.16, 1]);
-  const audienceDeckX = useTransform(progress, (value) => {
-    const transitionProgress = Math.max(0, (value - 0.82) / 0.18);
-    const slideIndex = Math.min(transitionProgress * Math.max(enabledSlides.length - 1, 0), Math.max(enabledSlides.length - 1, 0));
-    return `${-slideIndex * 100}%`;
-  });
+  const audienceDeckOpacity = useTransform(progress, [0.62, 0.7], [0, 1]);
+  const audienceDeckScale = useTransform(progress, [0.62, 0.7], [1.12, 1]);
 
   return (
     <section ref={sectionRef} data-atlas-continuous-story="true" data-atlas-story-variant={variant} className="relative bg-atlas-navy">
-      <div className={isV1 ? "h-[520vh] min-h-[3600px]" : "h-[360vh] min-h-[2500px]"}>
-        <div className="sticky top-20 min-h-[calc(100vh-5rem)] overflow-hidden text-white">
+      <div className={isV1 ? "h-[760vh] min-h-[5200px]" : "h-[360vh] min-h-[2500px]"}>
+        <div className={isV1 ? "sticky top-0 h-screen overflow-hidden text-white" : "sticky top-20 min-h-[calc(100vh-5rem)] overflow-hidden text-white"}>
           <motion.div className="absolute inset-0" style={{ opacity: heroImageOpacity }}>
             <Image src="/images/atlas-singapore-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[62%_center]" />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.74)_28%,rgba(255,255,255,0.1)_58%,rgba(7,29,58,0.42)_100%)]" />
@@ -172,7 +167,7 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
             </motion.div>
           ) : null}
 
-          <div className="container-shell relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-between py-8">
+          <div className={`container-shell relative z-10 flex flex-col justify-between py-8 ${isV1 ? "h-full" : "min-h-[calc(100vh-5rem)]"}`}>
             <motion.div className="max-w-[680px] pt-8" style={{ opacity: heroOpacity, y: heroY }}>
               <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-atlas-gold">Singapore immigration and corporate services</p>
               <h1 className={useLightHeroText ? "max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]" : "max-w-[650px] font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]"}>
@@ -190,39 +185,17 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
 
             {isV1 ? (
               <motion.div
-                className="absolute inset-y-0 z-20 overflow-hidden"
+                className="absolute inset-y-0 z-20 overflow-hidden bg-atlas-navy"
                 style={{ left: "calc((100% - 100vw) / 2)", width: "100vw", opacity: audienceDeckOpacity, scale: audienceDeckScale }}
               >
-                <AudienceDeckBackground />
-                <motion.div className="relative flex h-full" style={{ x: audienceDeckX }}>
-                  {enabledSlides.map((slide, index) => (
-                    <article key={slide.id} className="h-full min-h-full min-w-full shrink-0">
-                      <div className="container-shell grid h-full min-h-full items-center gap-6 py-6 text-atlas-navy md:grid-cols-[1.08fr_0.92fr] md:gap-12 md:py-8">
-                        <div className="relative h-[32vh] min-h-[220px] overflow-hidden bg-atlas-navy shadow-[0_24px_90px_rgba(7,29,58,0.2)] md:h-[min(68vh,680px)] md:min-h-[320px]">
-                          <Image src={slide.image} alt="" fill sizes="(min-width: 768px) 54vw, 100vw" className="object-cover" />
-                          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(6,22,45,0.68)_100%)]" />
-                          <span className="absolute bottom-6 left-6 text-xs font-bold uppercase tracking-[0.22em] text-[#f4f8fb] md:bottom-10 md:left-10">{String(index + 1).padStart(2, "0")} / {slide.label}</span>
-                        </div>
-                        <div className="max-w-xl">
-                          <p className="text-xs font-bold uppercase tracking-[0.22em] text-atlas-gold">Your Singapore path</p>
-                          <h2 className="mt-4 font-serif text-4xl leading-[0.95] md:text-7xl">{slide.title}</h2>
-                          <p className="mt-5 text-base leading-7 text-[#3a526a] md:text-xl md:leading-8">{slide.subtitle}</p>
-                          <p className="mt-5 hidden max-w-lg text-base leading-7 text-[#4c6074] md:block">{slide.description}</p>
-                          <div className="mt-4 flex flex-wrap gap-2 md:mt-6">
-                            {slide.services.slice(0, 2).map((service) => (
-                              <span key={service} className="rounded-full border border-atlas-navy/18 px-3 py-1.5 text-sm text-[#3a526a]">
-                                {service}
-                              </span>
-                            ))}
-                          </div>
-                          <Link href={slide.href} className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-atlas-navy transition hover:text-atlas-gold">
-                            Explore {slide.label} <ArrowRight aria-hidden="true" className="size-4" />
-                          </Link>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </motion.div>
+                <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(207,236,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(207,236,255,0.16)_1px,transparent_1px)] [background-size:25%_100%,25%_100%]" />
+                {enabledSlides.map((slide, index) => (
+                  <V1SignalPathSlide key={slide.id} slide={slide} index={index} progress={progress} reduceMotion={reduceMotion} revealStart={index === 0 ? 0.62 : 0.76 + (index - 1) * 0.11} />
+                ))}
+                <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/84 md:px-10">
+                  <span>Atlas / Singapore</span>
+                  <span>{String(enabledSlides.length).padStart(2, "0")} guided paths</span>
+                </div>
               </motion.div>
             ) : (
               <motion.div className="grid gap-4 md:grid-cols-3" style={{ opacity: pathOpacity, y: pathY }}>
@@ -276,7 +249,7 @@ function StoryMap({ routeLength, tone, variant }: { routeLength: MotionValue<num
   const visibleOriginPoints = variant === "v1" ? originPoints : originPoints.slice(0, standardOriginPointCount);
 
   return (
-    <svg viewBox="0 0 1200 640" aria-hidden="true" className="h-full w-full">
+    <svg viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true" className="h-full w-full">
       <defs>
         <pattern id="story-map-dots" width="14" height="14" patternUnits="userSpaceOnUse">
           <circle cx="2" cy="2" r="1.05" fill="#9BB7D0" opacity="0.42" />
@@ -369,13 +342,51 @@ function StoryMap({ routeLength, tone, variant }: { routeLength: MotionValue<num
   );
 }
 
-function AudienceDeckBackground() {
+function V1SignalPathSlide({
+  slide,
+  index,
+  progress,
+  reduceMotion,
+  revealStart
+}: {
+  slide: AudienceJourneySlide;
+  index: number;
+  progress: MotionValue<number>;
+  reduceMotion: boolean | null;
+  revealStart: number;
+}) {
+  const revealEnd = revealStart + 0.11;
+  const clipPath = useTransform(progress, [revealStart, revealEnd], ["inset(100% 0 0 0)", "inset(0% 0 0 0)"]);
+  const imageScale = useTransform(progress, [revealStart, revealEnd], reduceMotion ? [1, 1] : [1.14, 1]);
+  const imageBlur = useTransform(progress, [revealStart, revealEnd], ["blur(18px)", "blur(0px)"]);
+  const contentY = useTransform(progress, [revealStart, revealEnd], reduceMotion ? [0, 0] : [72, 0]);
+  const contentOpacity = useTransform(progress, [revealStart, revealEnd], [0, 1]);
+
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#eaf2f7]">
-      <div className="absolute inset-0 opacity-65 [background-image:linear-gradient(rgba(7,29,58,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(7,29,58,0.08)_1px,transparent_1px)] [background-size:5rem_5rem]" />
-      <div className="absolute inset-y-0 left-[12%] w-px bg-atlas-navy/[0.05]" />
-      <div className="absolute inset-y-0 right-[18%] w-px bg-atlas-gold/10" />
-    </div>
+    <motion.article className="absolute inset-0 overflow-hidden bg-atlas-navy" style={{ clipPath: index === 0 ? undefined : clipPath, opacity: index === 0 ? contentOpacity : undefined, zIndex: index + 1 }}>
+      <motion.div className="absolute inset-0" style={{ scale: imageScale, filter: imageBlur }}>
+        <Image src={slide.image} alt="" fill priority={index === 0} sizes="100vw" className="object-cover" />
+      </motion.div>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,18,38,0.94)_0%,rgba(5,29,57,0.62)_46%,rgba(4,18,38,0.2)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_48%,rgba(4,18,38,0.82)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(207,236,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(207,236,255,0.16)_1px,transparent_1px)] [background-size:25%_100%,25%_100%]" />
+      <motion.div className="container-shell relative z-10 flex h-full flex-col justify-end pb-10 pt-24 md:pb-14" style={{ opacity: contentOpacity, y: contentY }}>
+        <div className="grid gap-8 border-t border-white/25 pt-6 md:grid-cols-[0.18fr_0.56fr_0.26fr] md:items-end">
+          <div className="font-serif text-5xl text-atlas-amber md:text-7xl">0{index + 1}</div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-atlas-amber">{slide.label}</p>
+            <h2 className="mt-4 max-w-4xl font-serif text-5xl leading-[0.92] md:text-[clamp(4.5rem,8vw,9rem)]">{slide.title}</h2>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/82 md:text-xl">{slide.subtitle}</p>
+          </div>
+          <div className="border-l border-white/25 pl-5">
+            <p className="text-sm leading-6 text-white/72">{slide.description}</p>
+            <Link href={slide.href} className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-white transition hover:text-atlas-amber">
+              Explore <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </motion.article>
   );
 }
 
