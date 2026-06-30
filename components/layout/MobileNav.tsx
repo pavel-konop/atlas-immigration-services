@@ -4,8 +4,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { navigation } from "@/content/config/navigation";
-import { business } from "@/content/config/business";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export function MobileNav({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -35,15 +33,6 @@ export function MobileNav({ compact = false }: { compact?: boolean }) {
               </Link>
             ))}
           </nav>
-          <div className="mt-4 grid gap-2">
-            <ButtonLink href="/contact">Speak with a Consultant</ButtonLink>
-            <a
-              href={business.whatsappHref}
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-white/24 px-4 text-sm font-semibold text-white"
-            >
-              WhatsApp Us
-            </a>
-          </div>
         </div>
       ) : null}
     </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { business } from "@/content/config/business";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { AiReadinessPanel } from "@/components/ai/AiReadinessPanel";
+import { MerlionV4Experience } from "@/components/sections/MerlionV4Experience";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
 export const metadata: Metadata = pageMetadata({
@@ -13,18 +14,7 @@ export const metadata: Metadata = pageMetadata({
 export default function AboutPage() {
   return (
     <>
-      <section className="bg-atlas-navy py-18 text-white">
-        <div className="container-shell max-w-4xl">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-atlas-gold">About Atlas</p>
-          <h1 className="mt-4 font-serif text-4xl leading-tight md:text-6xl">
-            Personal immigration and corporate guidance from Singapore
-          </h1>
-          <p className="mt-6 text-lg leading-8 text-white/74">
-            Atlas Immigration Services Pte Ltd is a Singapore-based consultancy led by Bernie, Chief Consultant. The
-            team supports individuals, families, entrepreneurs, and employers with practical next steps.
-          </p>
-        </div>
-      </section>
+      <MerlionV4Experience showPathSlides={false} />
       <section className="bg-white py-18">
         <div className="container-shell grid gap-8 md:grid-cols-[0.85fr_1.15fr]">
           <SectionHeader

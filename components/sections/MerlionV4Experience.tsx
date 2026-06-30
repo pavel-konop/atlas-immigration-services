@@ -8,23 +8,38 @@ import type { MotionValue } from "motion/react";
 import { useRef } from "react";
 import type { AudienceJourneySlide } from "@/types/admin-content";
 
-export function MerlionV4Experience({ slides }: { slides: AudienceJourneySlide[] }) {
+export function MerlionV4Experience({ slides, showPathSlides = true }: { slides?: AudienceJourneySlide[]; showPathSlides?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
-  const enabledSlides = slides.filter((slide) => slide.enabled).slice(0, 3);
+  const enabledSlides = showPathSlides ? (slides || []).filter((slide) => slide.enabled).slice(0, 3) : [];
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   const progress = useSpring(scrollYProgress, { stiffness: 72, damping: 25, mass: 0.42 });
 
   const whiteCanvasOpacity = useTransform(progress, [0, 0.3, 0.42], [1, 1, 0]);
   const merlionMaskOpacity = useTransform(progress, [0, 0.34, 0.45], [1, 1, 0]);
-  const merlionMaskSize = useTransform(progress, [0, 0.28, 0.42], reduceMotion ? ["auto 132%", "auto 132%", "auto 132%"] : ["auto 132%", "auto 205%", "auto 680%"]);
+  const merlionStartSize = showPathSlides ? "auto 132%" : "auto 102%";
+  const merlionMidSize = showPathSlides ? "auto 205%" : "auto 148%";
+  const merlionEndSize = showPathSlides ? "auto 680%" : "auto 620%";
+  const merlionMaskSize = useTransform(
+    progress,
+    [0, 0.28, 0.42],
+    reduceMotion ? [merlionStartSize, merlionStartSize, merlionStartSize] : [merlionStartSize, merlionMidSize, merlionEndSize]
+  );
   const cityScale = useTransform(progress, [0, 0.42], reduceMotion ? [1, 1] : [1.2, 1]);
   const openingTextOpacity = useTransform(progress, [0, 0.16, 0.28], [1, 1, 0]);
-  const cityStatementOpacity = useTransform(progress, [0.28, 0.42, 0.52], [0, 1, 0]);
+  const cityStatementOpacity = useTransform(progress, showPathSlides ? [0.28, 0.42, 0.52] : [0.28, 0.42, 1], showPathSlides ? [0, 1, 0] : [0, 1, 1]);
   const cityStatementY = useTransform(progress, [0.28, 0.42], reduceMotion ? [0, 0] : [48, 0]);
+  const openingTextClassName = showPathSlides
+    ? "absolute left-[27%] top-[17%] w-[22%] text-center"
+    : "absolute left-[38%] top-[19%] w-[20%] text-center";
 
   return (
-    <section ref={sectionRef} data-atlas-merlion-story="true" className="relative h-[560vh] min-h-[4000px] bg-[#071d3a]">
+    <section
+      ref={sectionRef}
+      data-atlas-merlion-story="true"
+      data-atlas-merlion-mode={showPathSlides ? "full" : "intro"}
+      className={`relative bg-[#071d3a] ${showPathSlides ? "h-[560vh] min-h-[4000px]" : "h-[260vh] min-h-[1800px]"}`}
+    >
       <div className="sticky top-0 h-screen overflow-hidden bg-[radial-gradient(circle_at_76%_10%,#5ea9e5_0%,#2e659b_32%,#123b67_68%,#071d3a_100%)]">
         <motion.div className="absolute inset-0" style={{ scale: cityScale }}>
           <Image src="/images/atlas-singapore-hero.png" alt="Singapore skyline at sunset" fill priority sizes="100vw" className="object-cover object-[62%_center]" />
@@ -54,7 +69,7 @@ export function MerlionV4Experience({ slides }: { slides: AudienceJourneySlide[]
             <Image src="/images/atlas-singapore-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[62%_center]" />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,22,45,0.76),rgba(6,22,45,0.18)_68%)]" />
           </motion.div>
-          <motion.div className="absolute left-[27%] top-[17%] w-[22%] text-center" style={{ opacity: openingTextOpacity }}>
+          <motion.div className={openingTextClassName} style={{ opacity: openingTextOpacity }}>
             <div className="text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.42)]">
               <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-atlas-amber sm:text-xs">Atlas</p>
               <h1 className="mt-3 font-serif text-[clamp(1.4rem,2.2vw,2.8rem)] leading-[0.9]">Singapore,<br />in view.</h1>
@@ -74,16 +89,18 @@ export function MerlionV4Experience({ slides }: { slides: AudienceJourneySlide[]
           </div>
         </motion.div>
 
-        {enabledSlides.map((slide, index) => (
-          <V4PathSlide
-            key={slide.id}
-            slide={slide}
-            index={index}
-            progress={progress}
-            reduceMotion={reduceMotion}
-            start={0.48 + index * 0.16}
-          />
-        ))}
+        {showPathSlides
+          ? enabledSlides.map((slide, index) => (
+              <V4PathSlide
+                key={slide.id}
+                slide={slide}
+                index={index}
+                progress={progress}
+                reduceMotion={reduceMotion}
+                start={0.48 + index * 0.16}
+              />
+            ))
+          : null}
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/78 md:px-10">
           <span>Singapore / Atlas</span>

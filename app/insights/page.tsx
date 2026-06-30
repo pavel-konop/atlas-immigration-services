@@ -21,7 +21,7 @@ export default async function InsightsPage() {
     <section className="bg-atlas-cream py-18">
       <div className="container-shell">
         <SectionHeader
-          eyebrow="Insights"
+          eyebrow="Insights and updates"
           title="Guides for Singapore immigration and business planning"
           description="Short, practical articles for people preparing their next move."
           align="center"

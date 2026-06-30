@@ -1,9 +1,6 @@
 export const navigation = [
-  { label: "Services", href: "/services" },
-  { label: "For Individuals", href: "/services/employment-pass" },
-  { label: "For Entrepreneurs", href: "/services/company-incorporation" },
-  { label: "For Businesses", href: "/services/corporate-compliance" },
   { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
   { label: "Insights", href: "/insights" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" }

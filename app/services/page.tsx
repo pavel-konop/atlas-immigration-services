@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { services } from "@/content/services";
 import { getSiteContent, mergeServiceOverride } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
+import { Process } from "@/components/sections/Process";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ServiceCard } from "@/components/ui/ServiceCard";
 
@@ -18,20 +19,23 @@ export default async function ServicesPage() {
   const editableServices = services.map((service) => mergeServiceOverride(service, siteContent));
 
   return (
-    <section className="bg-atlas-cream py-18">
-      <div className="container-shell">
-        <SectionHeader
-          eyebrow="Services"
-          title="Singapore-focused support for each step"
-          description="Choose a service area to understand the likely process, documents, and next steps."
-          align="center"
-        />
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {editableServices.map((service) => (
-            <ServiceCard key={service.slug} service={service} />
-          ))}
+    <>
+      <section className="bg-atlas-cream py-18">
+        <div className="container-shell">
+          <SectionHeader
+            eyebrow="Services"
+            title="Singapore-focused support for each step"
+            description="Choose a service area to understand the likely process, documents, and next steps."
+            align="center"
+          />
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {editableServices.map((service) => (
+              <ServiceCard key={service.slug} service={service} />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <Process />
+    </>
   );
 }

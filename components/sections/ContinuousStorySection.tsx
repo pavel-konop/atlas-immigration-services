@@ -84,19 +84,7 @@ const originPoints = [...standardOriginPoints, ...v1AdditionalOriginPoints].map(
   };
 });
 
-const standardOriginPointCount = standardOriginPoints.length;
-const supplementalDots = v1AdditionalOriginPoints.map((dot) => {
-  const point = projection(dot.lngLat) || [0, 0];
-  return {
-    ...dot,
-    x: point[0],
-    y: point[1]
-  };
-});
-
-const storySteps = ["Partner", "Map", "Path"] as const;
-type StoryVariant = "v1" | "v2" | "v3";
-type StoryTone = "classic" | "modern" | "transition";
+type StoryVariant = "v1";
 
 export const ContinuousStorySection = dynamic(() => Promise.resolve(ContinuousStoryExperience), {
   ssr: false,
@@ -107,41 +95,34 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const enabledSlides = slides.filter((slide) => slide.enabled).slice(0, 3);
-  const tone: StoryTone = variant === "v2" ? "modern" : variant === "v3" ? "transition" : "classic";
-  const isV1 = variant === "v1";
-  const isModern = tone === "modern";
-  const isTransition = tone === "transition";
-  const useLightHeroText = isV1 || isModern || isTransition;
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"]
   });
   const progress = useSpring(scrollYProgress, { stiffness: 74, damping: 24, mass: 0.38 });
 
-  const heroOpacity = useTransform(progress, isTransition ? [0, 0.3, 0.46] : [0, 0.22, 0.36], [1, 1, 0]);
-  const heroY = useTransform(progress, isTransition ? [0, 0.46] : [0, 0.36], [0, -64]);
+  const heroOpacity = useTransform(progress, [0, 0.22, 0.36], [1, 1, 0]);
+  const heroY = useTransform(progress, [0, 0.36], [0, -64]);
   const heroImageOpacity = useTransform(progress, [0, 0.28, 0.46], [1, 0.72, 0.18]);
   const navyOpacity = useTransform(progress, [0, 0.26, 0.5], [0.2, 0.78, 1]);
-  const mapOpacity = useTransform(progress, isV1 ? [0.18, 0.34, 0.58, 0.68] : [0.18, 0.34, 0.82], isV1 ? [0, 1, 1, 0] : [0, 1, 0.82]);
+  const mapOpacity = useTransform(progress, [0.18, 0.34, 0.58, 0.68], [0, 1, 1, 0]);
   const mapScale = useTransform(
     progress,
-    isV1 ? [0.26, 0.55, 0.62, 0.68] : [0.26, 0.58, 1],
-    isV1 ? (reduceMotion ? [1, 1, 1, 1] : [1.02, 1.28, 2.75, 3.25]) : reduceMotion ? [1, 1, 1] : [1.02, 1.28, 1.38]
+    [0.26, 0.55, 0.62, 0.68],
+    reduceMotion ? [1, 1, 1, 1] : [1.02, 1.28, 2.75, 3.25]
   );
-  const mapX = useTransform(progress, isV1 ? [0.26, 0.55, 0.68] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [20, -92, -150] : [20, -92, -130]);
-  const mapY = useTransform(progress, isV1 ? [0.26, 0.55, 0.68] : [0.26, 0.58, 1], reduceMotion ? isV1 ? [0, 0, 0] : [0, 0, 0] : isV1 ? [0, -48, -96] : [0, -48, -58]);
-  const mapBlur = useTransform(progress, isV1 ? [0.58, 0.68] : [0, 1], isV1 ? ["blur(0px)", "blur(8px)"] : ["blur(0px)", "blur(0px)"]);
+  const mapX = useTransform(progress, [0.26, 0.55, 0.68], reduceMotion ? [0, 0, 0] : [20, -92, -150]);
+  const mapY = useTransform(progress, [0.26, 0.55, 0.68], reduceMotion ? [0, 0, 0] : [0, -48, -96]);
+  const mapBlur = useTransform(progress, [0.58, 0.68], ["blur(0px)", "blur(8px)"]);
   const routeLength = useTransform(progress, [0.34, 0.56], [0, 1]);
-  const pathOpacity = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [0, 1]);
-  const pathY = useTransform(progress, isTransition ? [0.52, 0.72] : [0.62, 0.78], [96, 0]);
   const mapInfoOpacity = useTransform(progress, [0.34, 0.48, 0.6], [0, 1, 0]);
   const audienceDeckOpacity = useTransform(progress, [0.62, 0.7], [0, 1]);
   const audienceDeckScale = useTransform(progress, [0.62, 0.7], [1.12, 1]);
 
   return (
     <section ref={sectionRef} data-atlas-continuous-story="true" data-atlas-story-variant={variant} className="relative bg-atlas-navy">
-      <div className={isV1 ? "h-[760vh] min-h-[5200px]" : "h-[360vh] min-h-[2500px]"}>
-        <div className={isV1 ? "sticky top-0 h-screen overflow-hidden text-white" : "sticky top-20 min-h-[calc(100vh-5rem)] overflow-hidden text-white"}>
+      <div className="h-[760vh] min-h-[5200px]">
+        <div className="sticky top-0 h-screen overflow-hidden text-white">
           <motion.div className="absolute inset-0" style={{ opacity: heroImageOpacity }}>
             <Image src="/images/atlas-singapore-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[62%_center]" />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.74)_28%,rgba(255,255,255,0.1)_58%,rgba(7,29,58,0.42)_100%)]" />
@@ -158,83 +139,39 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
               transformOrigin: `${(singapore.x / 1200) * 100}% ${(singapore.y / 640) * 100}%`
             }}
           >
-            <StoryMap routeLength={routeLength} tone={tone} variant={variant} />
+            <StoryMap routeLength={routeLength} />
           </motion.div>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_52%,rgba(217,165,40,0.14),transparent_28%),linear-gradient(90deg,rgba(7,29,58,0.92)_0%,rgba(7,29,58,0.7)_28%,rgba(7,29,58,0.16)_58%,rgba(7,29,58,0)_100%)]" />
-          {isTransition ? (
-            <motion.div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[55%]" style={{ opacity: pathOpacity }}>
-              <TransitionGridMap />
-            </motion.div>
-          ) : null}
 
-          <div className={`container-shell relative z-10 flex flex-col justify-between py-8 ${isV1 ? "h-full" : "min-h-[calc(100vh-5rem)]"}`}>
+          <div className="container-shell relative z-10 flex h-full flex-col justify-between py-8">
             <motion.div className="max-w-[680px] pt-8" style={{ opacity: heroOpacity, y: heroY }}>
               <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-atlas-gold">Singapore immigration and corporate services</p>
-              <h1 className={useLightHeroText ? "max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]" : "max-w-[650px] font-serif text-5xl leading-[1.03] text-atlas-navy md:text-[4.7rem]"}>
-                Your trusted <span className={isModern ? "text-cyan-200" : "text-atlas-gold"}>Singapore</span> partner
+              <h1 className="max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]">
+                Building Futures <span className="text-atlas-gold">Across Borders</span>
               </h1>
-              <p className={useLightHeroText ? "mt-6 max-w-lg text-lg leading-8 text-white/86 drop-shadow-[0_2px_12px_rgba(0,0,0,0.34)]" : "mt-6 max-w-lg text-lg leading-8 text-slate-700"}>
-                Immigration and corporate services guidance with a personal, practical touch.
+              <p className="mt-6 max-w-lg text-lg leading-8 text-white/86 drop-shadow-[0_2px_12px_rgba(0,0,0,0.34)]">
+                Helping individuals, families, and businesses navigate global migration with confidence
               </p>
             </motion.div>
 
-            <motion.div className="max-w-xl" style={{ opacity: isV1 ? mapInfoOpacity : mapOpacity }}>
+            <motion.div className="max-w-xl" style={{ opacity: mapInfoOpacity }}>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-atlas-gold">Singapore journey map</p>
-              <p className="mt-4 max-w-sm text-base font-semibold leading-7 text-white">From global origins to a confident Singapore start.</p>
+              <p className="mt-4 max-w-sm text-base font-semibold leading-7 text-white">Supporting your migration journey across borders</p>
             </motion.div>
 
-            {isV1 ? (
-              <motion.div
-                className="absolute inset-y-0 z-20 overflow-hidden bg-atlas-navy"
-                style={{ left: "calc((100% - 100vw) / 2)", width: "100vw", opacity: audienceDeckOpacity, scale: audienceDeckScale }}
-              >
-                <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(207,236,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(207,236,255,0.16)_1px,transparent_1px)] [background-size:25%_100%,25%_100%]" />
-                {enabledSlides.map((slide, index) => (
-                  <V1SignalPathSlide key={slide.id} slide={slide} index={index} progress={progress} reduceMotion={reduceMotion} revealStart={index === 0 ? 0.62 : 0.76 + (index - 1) * 0.11} />
-                ))}
-                <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/84 md:px-10">
-                  <span>Atlas / Singapore</span>
-                  <span>{String(enabledSlides.length).padStart(2, "0")} guided paths</span>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div className="grid gap-4 md:grid-cols-3" style={{ opacity: pathOpacity, y: pathY }}>
-                {enabledSlides.map((slide, index) => (
-                  <Link
-                    key={slide.id}
-                    href={slide.href}
-                    className={
-                      isTransition
-                        ? "group grid min-h-[260px] gap-4 rounded-md border border-cyan-200/22 bg-[#0f1621]/88 p-4 text-white shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold md:grid-cols-[0.48fr_0.52fr] md:items-center"
-                        : "group grid min-h-[235px] gap-4 rounded-md border border-white/14 bg-white/10 p-4 text-white shadow-soft backdrop-blur-md transition hover:-translate-y-1 hover:border-atlas-gold"
-                    }
-                  >
-                    <span className={isTransition ? "relative block min-h-[210px] overflow-hidden rounded-md bg-white/10" : "relative block aspect-[16/9] overflow-hidden rounded-md bg-white/10"}>
-                      <Image src={slide.image} alt="" fill sizes="33vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                    </span>
-                    <span>
-                      <span className="text-sm font-bold text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
-                      <span className="mt-2 block font-serif text-2xl leading-tight">{slide.label}</span>
-                      <span className="mt-2 block text-sm leading-6 text-white/72">{slide.subtitle}</span>
-                      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold">
-                        Explore <ArrowRight aria-hidden="true" className="h-4 w-4 transition group-hover:translate-x-1" />
-                      </span>
-                    </span>
-                  </Link>
-                ))}
-              </motion.div>
-            )}
-
-            {!isV1 ? (
-              <div className="flex flex-wrap gap-2">
-                {storySteps.map((step, index) => (
-                  <span key={step} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/18 bg-white/8 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white/86 backdrop-blur">
-                    <span className="text-atlas-gold">{String(index + 1).padStart(2, "0")}</span>
-                    {step}
-                  </span>
-                ))}
+            <motion.div
+              className="absolute inset-y-0 z-20 overflow-hidden bg-atlas-navy"
+              style={{ left: "calc((100% - 100vw) / 2)", width: "100vw", opacity: audienceDeckOpacity, scale: audienceDeckScale }}
+            >
+              <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(207,236,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(207,236,255,0.16)_1px,transparent_1px)] [background-size:25%_100%,25%_100%]" />
+              {enabledSlides.map((slide, index) => (
+                <V1SignalPathSlide key={slide.id} slide={slide} index={index} progress={progress} reduceMotion={reduceMotion} revealStart={index === 0 ? 0.62 : 0.76 + (index - 1) * 0.11} />
+              ))}
+              <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-5 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/84 md:px-10">
+                <span>Atlas / Singapore</span>
+                <span>{String(enabledSlides.length).padStart(2, "0")} guided paths</span>
               </div>
-            ) : null}
+            </motion.div>
           </div>
         </div>
       </div>
@@ -242,20 +179,12 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
   );
 }
 
-function StoryMap({ routeLength, tone, variant }: { routeLength: MotionValue<number>; tone: StoryTone; variant: StoryVariant }) {
-  const modern = tone === "modern";
-  const transition = tone === "transition";
-  const mapDotPattern = modern ? "story-modern-dots" : "story-map-dots";
-  const visibleOriginPoints = variant === "v1" ? originPoints : originPoints.slice(0, standardOriginPointCount);
-
+function StoryMap({ routeLength }: { routeLength: MotionValue<number> }) {
   return (
     <svg viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true" className="h-full w-full">
       <defs>
         <pattern id="story-map-dots" width="14" height="14" patternUnits="userSpaceOnUse">
           <circle cx="2" cy="2" r="1.05" fill="#9BB7D0" opacity="0.42" />
-        </pattern>
-        <pattern id="story-modern-dots" width="13" height="13" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1" fill="#63E7FF" opacity="0.5" />
         </pattern>
         <radialGradient id="story-anchor-glow" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#F0BD3C" stopOpacity="0.78" />
@@ -282,49 +211,31 @@ function StoryMap({ routeLength, tone, variant }: { routeLength: MotionValue<num
           </feMerge>
         </filter>
       </defs>
-      <rect width="1200" height="640" fill={modern ? "#041427" : "#071D3A"} />
-      {modern || transition ? (
-        <g opacity={modern ? "0.78" : "0.28"} filter="url(#storyContourGlow)">
-          <path d="M 108 488 C 212 408 274 406 350 480 S 504 554 630 430 S 820 304 1038 370" fill="none" stroke="#1EC7F4" strokeWidth="1.2" opacity="0.48" />
-          <path d="M 160 154 C 284 92 388 126 492 194 S 652 276 806 206 S 1008 144 1120 210" fill="none" stroke="#1EC7F4" strokeWidth="1" opacity="0.36" />
-          <path d="M 374 542 C 482 456 568 480 664 390 S 792 276 920 290" fill="none" stroke="#F0BD3C" strokeWidth="1.1" opacity="0.42" />
-          <path d="M 704 560 C 802 488 910 516 1060 458" fill="none" stroke="#2BD9FF" strokeWidth="1.6" opacity="0.32" />
-        </g>
-      ) : null}
+      <rect width="1200" height="640" fill="#071D3A" />
       <path d={graticulePath} fill="none" stroke="#4A7092" strokeWidth="0.7" strokeDasharray="2 10" opacity="0.34" />
-      <path d={landPath} fill={modern ? "#0F3558" : "#12365F"} opacity={modern ? "0.74" : "0.92"} />
-      <path d={landPath} fill={`url(#${mapDotPattern})`} opacity={modern ? "0.8" : "0.95"} />
-      <path d={countryPath} fill="none" stroke={modern ? "#2AD4FF" : "#254D75"} strokeWidth={modern ? "0.5" : "0.6"} opacity={modern ? "0.34" : "0.62"} />
-      {variant !== "v1"
-        ? supplementalDots.map((dot) => (
-            <g key={dot.key} opacity={modern ? "0.82" : "0.52"}>
-              <circle cx={dot.x} cy={dot.y} r={dot.radius} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="2.2" strokeDasharray={modern ? "16 7" : "none"} />
-              <circle cx={dot.x} cy={dot.y} r={dot.radius + 7} fill="none" stroke={modern ? "#23D4FF" : "#1DBFEA"} strokeWidth="1" opacity="0.24" />
-              <circle cx={dot.x} cy={dot.y} r="4" fill={modern ? "#23D4FF" : "#1DBFEA"} opacity="0.26" />
-            </g>
-          ))
-        : null}
-      {visibleOriginPoints.map((origin) => (
+      <path d={landPath} fill="#12365F" opacity="0.92" />
+      <path d={landPath} fill="url(#story-map-dots)" opacity="0.95" />
+      <path d={countryPath} fill="none" stroke="#254D75" strokeWidth="0.6" opacity="0.62" />
+      {originPoints.map((origin) => (
         <g key={origin.key}>
           <motion.path
             d={routePath([origin.x, origin.y], [singapore.x, singapore.y])}
             fill="none"
-            stroke={modern ? "url(#storyLinearGlow)" : "#D9A528"}
-            strokeWidth={modern ? "2.4" : "3.2"}
+            stroke="#D9A528"
+            strokeWidth="3.2"
             strokeLinecap="round"
             pathLength={routeLength}
             filter="url(#storySoftGlow)"
           />
-          <circle cx={origin.x} cy={origin.y} r={modern ? "5" : "6"} fill={modern ? "#28D9FF" : "#D9A528"} stroke="#FFF7DF" strokeWidth="1.8" />
-          <circle cx={origin.x} cy={origin.y} r={modern ? "16" : "14"} fill="none" stroke={modern ? "#28D9FF" : "#D9A528"} strokeWidth="1.6" opacity={modern ? "0.44" : "0.32"} />
+          <circle cx={origin.x} cy={origin.y} r="6" fill="#D9A528" stroke="#FFF7DF" strokeWidth="1.8" />
+          <circle cx={origin.x} cy={origin.y} r="14" fill="none" stroke="#D9A528" strokeWidth="1.6" opacity="0.32" />
           <text
             x={origin.labelX}
             y={origin.labelY}
             textAnchor={origin.anchor}
-            fill={modern ? "#D9F8FF" : "#FFFFFF"}
+            fill="#FFFFFF"
             fontSize="14"
             fontWeight="800"
-            className={modern ? "drop-shadow-[0_0_8px_rgba(103,232,249,0.75)]" : undefined}
           >
             {origin.label}
           </text>
@@ -387,41 +298,6 @@ function V1SignalPathSlide({
         </div>
       </motion.div>
     </motion.article>
-  );
-}
-
-function TransitionGridMap() {
-  return (
-    <svg viewBox="0 0 1200 420" aria-hidden="true" className="h-full w-full" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="transitionGridFade" x1="0%" x2="100%" y1="0%" y2="0%">
-          <stop offset="0%" stopColor="#111923" stopOpacity="0.88" />
-          <stop offset="46%" stopColor="#102236" stopOpacity="0.62" />
-          <stop offset="100%" stopColor="#111923" stopOpacity="0.9" />
-        </linearGradient>
-        <filter id="transitionGlow" x="-20%" y="-60%" width="140%" height="220%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <rect width="1200" height="420" fill="url(#transitionGridFade)" />
-      <g opacity="0.42">
-        {Array.from({ length: 28 }).map((_, index) => (
-          <path key={`grid-${index}`} d={`M ${index * 48 - 80} 420 C ${index * 48 + 20} 318 ${index * 48 + 46} 184 ${index * 48 + 130} 0`} fill="none" stroke="#5DD6FF" strokeWidth="0.7" opacity="0.22" />
-        ))}
-      </g>
-      <g filter="url(#transitionGlow)">
-        <path d="M 34 290 C 214 170 392 190 552 244 S 842 342 1136 142" fill="none" stroke="#8BDFFF" strokeWidth="1.3" opacity="0.56" />
-        <path d="M 180 360 C 332 266 454 298 594 220 S 828 88 1020 134" fill="none" stroke="#D9A528" strokeWidth="1.5" opacity="0.44" />
-        <path d="M 406 382 C 522 242 658 236 752 160 S 912 78 1102 96" fill="none" stroke="#5DD6FF" strokeWidth="1" opacity="0.5" />
-        <circle cx="552" cy="244" r="4" fill="#D9A528" />
-        <circle cx="752" cy="160" r="4" fill="#8BDFFF" />
-        <circle cx="1020" cy="134" r="4" fill="#D9A528" />
-      </g>
-    </svg>
   );
 }
 
