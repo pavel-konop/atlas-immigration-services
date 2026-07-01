@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { business } from "@/content/config/business";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { AiReadinessPanel } from "@/components/ai/AiReadinessPanel";
-import { MerlionV4Experience } from "@/components/sections/MerlionV4Experience";
+import { MerlionIntroExperience } from "@/components/sections/MerlionIntroExperience";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
 export const metadata: Metadata = pageMetadata({
@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
 export default function AboutPage() {
   return (
     <>
-      <MerlionV4Experience showPathSlides={false} />
+      <MerlionIntroExperience showPathSlides={false} />
       <section className="bg-white py-18">
         <div className="container-shell grid gap-8 md:grid-cols-[0.85fr_1.15fr]">
           <SectionHeader

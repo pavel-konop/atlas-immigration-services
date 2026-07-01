@@ -98,7 +98,7 @@ svg {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-33.3333%);
   }
 }
 
@@ -106,6 +106,19 @@ svg {
   animation: showcase-marquee 54s linear infinite;
 }
 
+.animate-showcase-marquee-slow {
+  animation: showcase-marquee 68s linear infinite;
+}
+
+.animate-showcase-marquee-reverse {
+  animation: showcase-marquee 62s linear infinite reverse;
+}
+
 .animate-showcase-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-showcase-marquee-slow:hover,
+.animate-showcase-marquee-reverse:hover {
   animation-play-state: paused;
 }

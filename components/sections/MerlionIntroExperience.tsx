@@ -8,7 +8,7 @@ import type { MotionValue } from "motion/react";
 import { useRef } from "react";
 import type { AudienceJourneySlide } from "@/types/admin-content";
 
-export function MerlionV4Experience({ slides, showPathSlides = true }: { slides?: AudienceJourneySlide[]; showPathSlides?: boolean }) {
+export function MerlionIntroExperience({ slides, showPathSlides = true }: { slides?: AudienceJourneySlide[]; showPathSlides?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const enabledSlides = showPathSlides ? (slides || []).filter((slide) => slide.enabled).slice(0, 3) : [];

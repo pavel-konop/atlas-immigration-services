@@ -8,7 +8,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 
 export function Header() {
   const pathname = usePathname();
-  const isImmersiveRoute = pathname === "/" || pathname === "/v1" || pathname === "/v4" || pathname === "/about";
+  const isImmersiveRoute = pathname === "/" || pathname === "/v1" || pathname === "/v2" || pathname === "/about";
   const usesCompactHeader = !pathname.startsWith("/admin");
 
   return (
