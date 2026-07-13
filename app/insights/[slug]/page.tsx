@@ -8,14 +8,15 @@ import { pageMetadata } from "@/lib/seo/metadata";
 import type { RouteParams } from "@/types/site";
 
 export async function generateStaticParams() {
-  const articles = await getArticles();
+  const siteContent = await getSiteContent();
+  const articles = await getArticles(siteContent);
   return articles.map((article) => ({ slug: article.slug }));
 }
 
 export async function generateMetadata({ params }: RouteParams<"slug">): Promise<Metadata> {
   const { slug } = await params;
   const siteContent = await getSiteContent();
-  const found = await getArticle(slug).catch(() => null);
+  const found = await getArticle(slug, siteContent).catch(() => null);
   const article = found ? mergeArticleOverride(found, siteContent) : null;
   if (!article) return {};
 
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: RouteParams<"slug">): Promise
 export default async function ArticlePage({ params }: RouteParams<"slug">) {
   const { slug } = await params;
   const siteContent = await getSiteContent();
-  const found = await getArticle(slug).catch(() => null);
+  const found = await getArticle(slug, siteContent).catch(() => null);
   const article = found ? mergeArticleOverride(found, siteContent) : null;
   if (!article) notFound();
 

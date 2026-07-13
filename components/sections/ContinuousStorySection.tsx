@@ -157,7 +157,7 @@ function ContinuousStoryExperience({ slides, variant = "v1" }: { slides: Audienc
           />
 
           <div className="container-shell relative z-10 flex h-full flex-col justify-between py-8">
-            <motion.div className="max-w-[680px] pt-8" style={{ opacity: heroOpacity, y: heroY }}>
+            <motion.div className="max-w-[680px] pt-16 md:pt-20" style={{ opacity: heroOpacity, y: heroY }}>
               <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-atlas-gold">Singapore immigration and corporate services</p>
               <h1 className="max-w-[650px] font-serif text-5xl leading-[1.03] text-white drop-shadow-[0_3px_24px_rgba(0,0,0,0.34)] md:text-[4.7rem]">
                 Building Futures <span className="text-atlas-gold">Across Borders</span>

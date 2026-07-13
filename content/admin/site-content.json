@@ -2,45 +2,129 @@
   "showcase": {
     "eyebrow": "Atlas in practice",
     "title": "Stories, updates, and Singapore support in motion",
-    "items": [
+    "mode": "recentInsights",
+    "recentInsightCount": 2,
+    "selectedItems": [
+      {
+        "type": "photo",
+        "id": "consultation-team"
+      },
+      {
+        "type": "feedback",
+        "id": "client-feedback"
+      },
+      {
+        "type": "article",
+        "id": "choosing-employment-pass-2026"
+      },
+      {
+        "type": "article",
+        "id": "starting-a-business-in-singapore"
+      }
+    ]
+  },
+  "contentLibrary": {
+    "photos": [
       {
         "id": "consultation-team",
-        "type": "photo",
         "title": "Consultation with practical next steps",
         "context": "Personal guidance for families, professionals, and founders preparing a Singapore move.",
         "image": "/images/atlas-consultation-team.png",
         "href": "/contact",
-        "enabled": true
-      },
+        "enabled": true,
+        "createdAt": "2026-06-01"
+      }
+    ],
+    "feedbacks": [
       {
         "id": "client-feedback",
-        "type": "feedback",
         "title": "Responsive and careful",
         "context": "Atlas made the process feel organized and kept communication clear at every stage.",
-        "image": "/images/atlas-founder-laptop.png",
         "href": "/about",
-        "enabled": true
-      },
+        "enabled": true,
+        "createdAt": "2026-06-01"
+      }
+    ],
+    "insights": [
       {
-        "id": "employment-pass-guide",
-        "type": "article",
-        "title": "Choosing the right work pass route",
-        "context": "A practical overview for professionals and employers comparing common Singapore pass pathways.",
+        "slug": "choosing-employment-pass-2026",
+        "title": "Choosing the right Singapore work pass route",
+        "description": "A practical overview for professionals and employers comparing Employment Pass, S Pass, and related family needs.",
+        "date": "2026-06-05",
+        "category": "Immigration",
         "image": "/images/atlas-corporate-review.png",
-        "href": "/insights/choosing-employment-pass-2026",
+        "content": "Singapore work pass planning usually starts with the role, salary, candidate profile, and employer context. A strong preparation process is less about chasing a single form and more about presenting the facts clearly.\n\n## Start with the purpose of the move\n\nAn Employment Pass pathway is typically considered for foreign professionals, managers, executives, and specialists. S Pass support may be relevant for mid-skilled roles where quota, levy, and salary requirements also matter.\n\n## Prepare the employer and candidate materials together\n\nEmployers should be ready with company details, role scope, compensation information, and supporting business context. Candidates should prepare passport details, education records, employment history, and any professional credentials.\n\n## Plan for family needs early\n\nIf a spouse or children are relocating, related pass planning should be discussed at the same time. That keeps timelines, documents, and expectations aligned.",
+        "featured": true,
         "enabled": true
       },
       {
-        "id": "business-setup",
-        "type": "article",
-        "title": "Starting a Singapore business presence",
-        "context": "Founder decisions that connect incorporation, administration, and future hiring.",
+        "slug": "starting-a-business-in-singapore",
+        "title": "Starting a business presence in Singapore",
+        "description": "Key early decisions for founders planning incorporation, administration, and future hiring in Singapore.",
+        "date": "2026-06-03",
+        "category": "Business",
         "image": "/images/atlas-founder-laptop.png",
-        "href": "/insights/starting-a-business-in-singapore",
+        "content": "Singapore is a practical base for founders who need a stable regional presence, clear corporate administration, and access to international markets.\n\n## Clarify your operating model\n\nBefore incorporation, founders should define the business activity, ownership, directorship, registered address, and likely hiring needs. These choices shape both the corporate setup and future immigration planning.\n\n## Treat compliance as a workflow\n\nCorporate secretary support, records, resolutions, and recurring filing obligations are easier to manage when they are planned from day one.\n\n## Connect company setup with immigration planning\n\nEntrepreneurs often need both a company and a personal relocation path. Discussing those needs together helps avoid mismatched timing or missing documents.",
+        "featured": true,
+        "enabled": true
+      },
+      {
+        "slug": "ltvp-family-application-guide",
+        "title": "Family relocation and LTVP planning",
+        "description": "Practical considerations for families preparing longer-term stay arrangements in Singapore.",
+        "date": "2026-05-28",
+        "category": "Immigration",
+        "image": "/images/atlas-consultation-team.png",
+        "content": "Family relocation requires more than a single application. Timelines, relationship documents, housing plans, schooling needs, and the main pass holder's status can all affect preparation.\n\n## Confirm eligibility before collecting documents\n\nBegin with the sponsor, relationship, and intended length of stay. That keeps the document checklist focused and avoids unnecessary back-and-forth.\n\n## Keep records consistent\n\nNames, dates, and relationship details should be consistent across passports, certificates, translations, and application materials.\n\n## Ask early about follow-on needs\n\nFamilies may also need guidance on Dependant's Pass matters, renewals, or future Permanent Residency planning.",
+        "featured": false,
         "enabled": true
       }
     ]
   },
+  "faqs": [
+    {
+      "id": "faq-1",
+      "category": "General",
+      "question": "Which service is right for my situation?",
+      "answer": "Start with a short consultation. Atlas will review whether your goals are individual, family, entrepreneur, or employer-led, then recommend a practical path and document checklist.",
+      "enabled": true
+    },
+    {
+      "id": "faq-2",
+      "category": "General",
+      "question": "What should I prepare before speaking with a consultant?",
+      "answer": "Bring your goal, current Singapore status if any, timeline, employer or company context, and key documents such as passport, qualifications, employment details, or company records.",
+      "enabled": true
+    },
+    {
+      "id": "faq-3",
+      "category": "Immigration",
+      "question": "Can Atlas support both individuals and companies?",
+      "answer": "Yes. Atlas supports individuals, families, entrepreneurs, and businesses, especially where immigration and corporate administration overlap.",
+      "enabled": true
+    },
+    {
+      "id": "faq-4",
+      "category": "Immigration",
+      "question": "Does Atlas guarantee application approval?",
+      "answer": "No consultancy can guarantee an authority decision. Atlas focuses on careful preparation, realistic guidance, and responsive follow-up based on your circumstances.",
+      "enabled": true
+    },
+    {
+      "id": "faq-5",
+      "category": "Corporate",
+      "question": "Can Atlas help with company incorporation in Singapore?",
+      "answer": "Yes. Atlas can guide founders through incorporation preparation, company details, required documents, and follow-on corporate secretarial or compliance support.",
+      "enabled": true
+    },
+    {
+      "id": "faq-6",
+      "category": "General",
+      "question": "How quickly will Atlas respond?",
+      "answer": "The team prioritizes responsive communication. For urgent matters, WhatsApp or phone is the fastest way to reach Bernie and the consulting team.",
+      "enabled": true
+    }
+  ],
   "audienceJourney": {
     "eyebrow": "Choose your path",
     "title": "Different Singapore goals, one guided process",
@@ -53,7 +137,11 @@
         "description": "Atlas helps clients understand the right path, prepare documents, and move through each Singapore immigration step with practical support.",
         "image": "/images/atlas-consultation-team.png",
         "href": "/services/employment-pass",
-        "services": ["Employment Pass", "Dependant's Pass", "Permanent Residency"],
+        "services": [
+          "Employment Pass",
+          "Dependant's Pass",
+          "Permanent Residency"
+        ],
         "enabled": true
       },
       {
@@ -64,7 +152,11 @@
         "description": "Set up your Singapore company with a clear operating model, compliance workflow, and immigration planning connected from day one.",
         "image": "/images/atlas-founder-laptop.png",
         "href": "/services/company-incorporation",
-        "services": ["Company Incorporation", "Corporate Secretary", "Permanent Residency"],
+        "services": [
+          "Company Incorporation",
+          "Corporate Secretary",
+          "Permanent Residency"
+        ],
         "enabled": true
       },
       {
@@ -75,7 +167,11 @@
         "description": "Atlas supports businesses that need responsive employment-pass coordination and organized corporate compliance support.",
         "image": "/images/atlas-corporate-review.png",
         "href": "/services/corporate-compliance",
-        "services": ["Employment Pass", "S Pass", "Corporate Compliance Support"],
+        "services": [
+          "Employment Pass",
+          "S Pass",
+          "Corporate Compliance Support"
+        ],
         "enabled": true
       }
     ]

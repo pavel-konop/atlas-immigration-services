@@ -10,6 +10,50 @@ export type ShowcaseItem = {
   enabled: boolean;
 };
 
+export type PhotoItem = {
+  id: string;
+  title: string;
+  context: string;
+  image: string;
+  href: string;
+  enabled: boolean;
+  createdAt: string;
+};
+
+export type FeedbackItem = {
+  id: string;
+  title: string;
+  context: string;
+  href: string;
+  enabled: boolean;
+  createdAt: string;
+};
+
+export type InsightItem = {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  image: string;
+  content: string;
+  featured: boolean;
+  enabled: boolean;
+};
+
+export type FAQItem = {
+  id: string;
+  category: "General" | "Immigration" | "Corporate";
+  question: string;
+  answer: string;
+  enabled: boolean;
+};
+
+export type ShowcaseReference = {
+  type: ShowcaseItemType;
+  id: string;
+};
+
 export type AudienceJourneySlide = {
   id: string;
   label: string;
@@ -39,8 +83,17 @@ export type SiteContent = {
   showcase: {
     eyebrow: string;
     title: string;
-    items: ShowcaseItem[];
+    mode: "recentInsights" | "manual";
+    recentInsightCount: number;
+    selectedItems: ShowcaseReference[];
+    items?: ShowcaseItem[];
   };
+  contentLibrary: {
+    photos: PhotoItem[];
+    feedbacks: FeedbackItem[];
+    insights: InsightItem[];
+  };
+  faqs: FAQItem[];
   audienceJourney: {
     eyebrow: string;
     title: string;

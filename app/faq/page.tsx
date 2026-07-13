@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { faqs } from "@/content/faqs";
+import { getEditableFaqs, getSiteContent } from "@/lib/admin/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { FAQList } from "@/components/ui/FAQList";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -10,7 +10,10 @@ export const metadata: Metadata = pageMetadata({
   path: "/faq"
 });
 
-export default function FAQPage() {
+export default async function FAQPage() {
+  const siteContent = await getSiteContent();
+  const faqs = getEditableFaqs(siteContent);
+
   return (
     <section className="bg-atlas-cream py-18">
       <div className="container-shell max-w-4xl">
@@ -27,3 +30,4 @@ export default function FAQPage() {
     </section>
   );
 }
+export const dynamic = "force-dynamic";

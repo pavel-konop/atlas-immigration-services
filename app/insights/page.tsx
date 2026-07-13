@@ -13,8 +13,8 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function InsightsPage() {
-  const articles = await getArticles();
   const siteContent = await getSiteContent();
+  const articles = await getArticles(siteContent);
   const editableArticles = articles.map((article) => mergeArticleOverride(article, siteContent));
 
   return (
