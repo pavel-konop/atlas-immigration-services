@@ -267,6 +267,19 @@ export async function getKnowledgeDocumentById(
   return result.rows[0] ? mapKnowledgeDocumentRow(result.rows[0]) : null;
 }
 
+/** Look up a document by its unique `(source_type, source_id)` pair. */
+export async function getKnowledgeDocumentBySource(
+  sourceType: string,
+  sourceId: string
+): Promise<KnowledgeDocumentRecord | null> {
+  const result = await query(
+    `SELECT ${DOCUMENT_COLUMNS} FROM ai_knowledge_documents
+     WHERE source_type = $1 AND source_id = $2`,
+    [sourceType, sourceId]
+  );
+  return result.rows[0] ? mapKnowledgeDocumentRow(result.rows[0]) : null;
+}
+
 export async function listEnabledKnowledgeDocuments(
   limit = 100
 ): Promise<KnowledgeDocumentRecord[]> {

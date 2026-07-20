@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "db:migrate:ai": "set -a; [ -f .env ] && . ./.env; set +a; for file in db/migrations/*.sql; do psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f \"$file\"; done",
     "mom:import": "node scripts/import-mom-content.mjs",
-    "mom:import:dry-run": "node scripts/import-mom-content.mjs --dry-run"
+    "mom:import:dry-run": "node scripts/import-mom-content.mjs --dry-run",
+    "ai:index": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/index-knowledge.ts",
+    "ai:index:dry-run": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/index-knowledge.ts --dry-run"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.5",
@@ -38,6 +40,7 @@
     "eslint-config-next": "^16.2.9",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.2"
   }
 }
