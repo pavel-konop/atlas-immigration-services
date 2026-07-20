@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate:ai": "set -a; [ -f .env ] && . ./.env; set +a; for file in db/migrations/*.sql; do psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f \"$file\"; done",
+    "mom:import": "node scripts/import-mom-content.mjs",
+    "mom:import:dry-run": "node scripts/import-mom-content.mjs --dry-run"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.5",
