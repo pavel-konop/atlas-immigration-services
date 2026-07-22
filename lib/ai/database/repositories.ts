@@ -371,6 +371,57 @@ export async function replaceDocumentChunks(
   });
 }
 
+/**
+ * Embedding state for every chunk belonging to an enabled document.
+ * `embedded` is true when the chunk already carries a vector for the given
+ * model + dimensions, so the embedding worker can skip it (idempotent re-runs).
+ */
+export type ChunkEmbeddingState = {
+  id: string;
+  chunkText: string;
+  embedded: boolean;
+};
+
+export async function listEnabledChunkEmbeddingState(
+  embeddingModel: string,
+  embeddingDimensions: number
+): Promise<ChunkEmbeddingState[]> {
+  const result = await query(
+    `SELECT c.id, c.chunk_text,
+       (c.embedding IS NOT NULL
+         AND c.embedding_model = $1
+         AND c.embedding_dimensions = $2) AS embedded
+     FROM ai_knowledge_chunks c
+     JOIN ai_knowledge_documents d ON d.id = c.document_id
+     WHERE d.enabled = true
+     ORDER BY c.document_id, c.chunk_index`,
+    [embeddingModel, embeddingDimensions]
+  );
+  return result.rows.map((row) => ({
+    id: row.id as string,
+    chunkText: row.chunk_text as string,
+    embedded: row.embedded as boolean
+  }));
+}
+
+/**
+ * Store an embedding vector on a chunk, along with the model and dimensions
+ * that produced it. The vector is passed as pgvector's `[v1,v2,...]` literal.
+ */
+export async function setChunkEmbedding(
+  id: string,
+  embedding: number[],
+  embeddingModel: string,
+  embeddingDimensions: number
+): Promise<void> {
+  await query(
+    `UPDATE ai_knowledge_chunks
+     SET embedding = $2::vector, embedding_model = $3, embedding_dimensions = $4
+     WHERE id = $1`,
+    [id, `[${embedding.join(",")}]`, embeddingModel, embeddingDimensions]
+  );
+}
+
 /* -------------------------------------------------------- retrieval matches */
 
 const RETRIEVAL_MATCH_COLUMNS = `

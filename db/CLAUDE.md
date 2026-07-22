@@ -1,3 +1,25 @@
+## Future consideration: multi-language content
+Articles will eventually be translated into additional languages (via Claude)
+once the target language list is defined. Not in scope for items 1–3, but
+item 4+ should account for it:
+- `ai_knowledge_documents`/`ai_knowledge_chunks` likely need a `language`
+  column (schema currently has none — this means a future migration).
+- Decide then: translated articles as separate documents with their own
+  `source_id` (e.g. `slug--fr`), or a language variant of the same document.
+- `search_vector` already uses `'simple'` config, which is language-agnostic
+  by luck rather than design — fine as-is, don't switch to `'english'`.
+- Embedding model choice (item 4) should be multilingual-capable if this
+  ships before a single-language MVP is locked in.
+
+## Known limitation: keyword search vocabulary matching
+The 'simple' FTS config does no stemming, and plainto_tsquery ANDs all
+terms — so exact-lexeme, in-vocabulary phrasing works ("employment pass
+documents") but near-miss phrasing doesn't ("incorporate a company" won't
+match a chunk containing only "incorporation"). This is expected and by
+design for item 3's scope. Item 4 (embeddings) + item 5 (hybrid retrieval)
+are specifically meant to close this gap — don't try to fix it by
+loosening to OR-matching or changing the FTS config in isolation.
+
 # Atlas AI Database — Context
 
 Scope: this file applies when working inside `db/`, `lib/ai/`, and
