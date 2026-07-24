@@ -15,6 +15,7 @@
     "ai:chunk": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/chunk-knowledge.ts",
     "ai:chunk:dry-run": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/chunk-knowledge.ts --dry-run",
     "ai:search": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/search-knowledge.ts",
+    "ai:search:hybrid": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/search-knowledge.ts --hybrid",
     "ai:embed": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/embed-knowledge.ts",
     "ai:embed:dry-run": "set -a; [ -f .env ] && . ./.env; set +a; tsx scripts/embed-knowledge.ts --dry-run"
   },
