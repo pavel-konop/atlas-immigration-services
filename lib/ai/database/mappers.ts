@@ -1,4 +1,9 @@
 import type {
+  ChatAnswerStatus,
+  ChatEventRecord,
+  ChatMessageRecord,
+  ChatMessageRole,
+  ChatSessionRecord,
   ContentIntakeRecord,
   ContentIntakeStatus,
   JsonObject,
@@ -128,6 +133,49 @@ export function mapRetrievalMatchRow(row: Row): RetrievalMatchRecord {
     score: (row.score as number | null) ?? null,
     snippet: (row.snippet as string | null) ?? null,
     metadata: toJsonObject(row.metadata),
+    createdAt: toIso(row.created_at)
+  };
+}
+
+export function mapChatSessionRow(row: Row): ChatSessionRecord {
+  return {
+    id: row.id as string,
+    refCode: (row.ref_code as string | null) ?? null,
+    visitorHash: (row.visitor_hash as string | null) ?? null,
+    sourcePage: (row.source_page as string | null) ?? null,
+    locale: (row.locale as string | null) ?? null,
+    userAgent: (row.user_agent as string | null) ?? null,
+    metadata: toJsonObject(row.metadata),
+    createdAt: toIso(row.created_at),
+    lastSeenAt: toIso(row.last_seen_at)
+  };
+}
+
+export function mapChatMessageRow(row: Row): ChatMessageRecord {
+  return {
+    id: row.id as string,
+    sessionId: row.session_id as string,
+    role: row.role as ChatMessageRole,
+    content: row.content as string,
+    createdAt: toIso(row.created_at)
+  };
+}
+
+export function mapChatEventRow(row: Row): ChatEventRecord {
+  return {
+    id: row.id as string,
+    sessionId: row.session_id as string,
+    userMessageId: (row.user_message_id as string | null) ?? null,
+    assistantMessageId: (row.assistant_message_id as string | null) ?? null,
+    question: row.question as string,
+    normalizedQuestion: (row.normalized_question as string | null) ?? null,
+    answerStatus: row.answer_status as ChatAnswerStatus,
+    modelName: (row.model_name as string | null) ?? null,
+    promptTokens: (row.prompt_tokens as number | null) ?? null,
+    completionTokens: (row.completion_tokens as number | null) ?? null,
+    latencyMs: (row.latency_ms as number | null) ?? null,
+    matchedSources: toJsonArray(row.matched_sources),
+    guardrailFlags: toJsonArray(row.guardrail_flags),
     createdAt: toIso(row.created_at)
   };
 }

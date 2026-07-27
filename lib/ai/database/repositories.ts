@@ -1,5 +1,8 @@
 import { query, withTransaction } from "./client";
 import {
+  mapChatEventRow,
+  mapChatMessageRow,
+  mapChatSessionRow,
   mapContentIntakeRow,
   mapKnowledgeChunkRow,
   mapKnowledgeDocumentRow,
@@ -7,6 +10,11 @@ import {
   mapRetrievalMatchRow
 } from "./mappers";
 import type {
+  ChatAnswerStatus,
+  ChatEventRecord,
+  ChatMessageRecord,
+  ChatMessageRole,
+  ChatSessionRecord,
   ContentIntakeRecord,
   ContentIntakeStatus,
   JsonObject,
@@ -332,6 +340,20 @@ export async function getChunksByDocument(
 }
 
 /**
+ * Fetch chunks by id (e.g. the top retrieval hits) so callers can build answer
+ * context from full chunk text. Result order is not guaranteed — callers that
+ * need ranking should re-order by their own scores.
+ */
+export async function getChunksByIds(ids: string[]): Promise<KnowledgeChunkRecord[]> {
+  if (ids.length === 0) return [];
+  const result = await query(
+    `SELECT ${CHUNK_COLUMNS} FROM ai_knowledge_chunks WHERE id = ANY($1::uuid[])`,
+    [ids]
+  );
+  return result.rows.map(mapKnowledgeChunkRow);
+}
+
+/**
  * Replace all chunks for a document in a single transaction: delete the
  * existing chunks and insert the provided set. Embeddings are left null here —
  * the embedding step populates them separately.
@@ -469,4 +491,165 @@ export async function insertRetrievalMatches(
     }
     return inserted;
   });
+}
+
+/* ----------------------------------------------------------- chat sessions */
+
+const CHAT_SESSION_COLUMNS = `
+  id, ref_code, visitor_hash, source_page, locale, user_agent, metadata,
+  created_at, last_seen_at
+`;
+
+export type CreateChatSessionInput = {
+  refCode: string;
+  visitorHash?: string | null;
+  sourcePage?: string | null;
+  locale?: string | null;
+  userAgent?: string | null;
+  metadata?: JsonObject;
+};
+
+export async function createChatSession(
+  input: CreateChatSessionInput
+): Promise<ChatSessionRecord> {
+  const result = await query(
+    `INSERT INTO ai_chat_sessions
+       (ref_code, visitor_hash, source_page, locale, user_agent, metadata)
+     VALUES ($1, $2, $3, $4, $5, COALESCE($6, '{}'::jsonb))
+     RETURNING ${CHAT_SESSION_COLUMNS}`,
+    [
+      input.refCode,
+      input.visitorHash ?? null,
+      input.sourcePage ?? null,
+      input.locale ?? null,
+      input.userAgent ?? null,
+      input.metadata ? JSON.stringify(input.metadata) : null
+    ]
+  );
+  return mapChatSessionRow(result.rows[0]);
+}
+
+export async function getChatSessionById(id: string): Promise<ChatSessionRecord | null> {
+  const result = await query(
+    `SELECT ${CHAT_SESSION_COLUMNS} FROM ai_chat_sessions WHERE id = $1`,
+    [id]
+  );
+  return result.rows[0] ? mapChatSessionRow(result.rows[0]) : null;
+}
+
+/** Bump last_seen_at to now (called on each turn). */
+export async function touchChatSession(id: string): Promise<void> {
+  await query(`UPDATE ai_chat_sessions SET last_seen_at = now() WHERE id = $1`, [id]);
+}
+
+/**
+ * Shallow-merge additional keys into a session's metadata jsonb (e.g. a
+ * volunteered first name or country). Existing keys are overwritten by `patch`.
+ */
+export async function mergeChatSessionMetadata(
+  id: string,
+  patch: JsonObject
+): Promise<void> {
+  await query(
+    `UPDATE ai_chat_sessions SET metadata = metadata || $2::jsonb WHERE id = $1`,
+    [id, JSON.stringify(patch)]
+  );
+}
+
+/* ----------------------------------------------------------- chat messages */
+
+const CHAT_MESSAGE_COLUMNS = `id, session_id, role, content, created_at`;
+
+export async function insertChatMessage(
+  sessionId: string,
+  role: ChatMessageRole,
+  content: string
+): Promise<ChatMessageRecord> {
+  const result = await query(
+    `INSERT INTO ai_chat_messages (session_id, role, content)
+     VALUES ($1, $2, $3)
+     RETURNING ${CHAT_MESSAGE_COLUMNS}`,
+    [sessionId, role, content]
+  );
+  return mapChatMessageRow(result.rows[0]);
+}
+
+/** Most recent messages for a session, returned oldest-first for prompt building. */
+export async function getRecentChatMessages(
+  sessionId: string,
+  limit = 8
+): Promise<ChatMessageRecord[]> {
+  const result = await query(
+    `SELECT * FROM (
+       SELECT ${CHAT_MESSAGE_COLUMNS} FROM ai_chat_messages
+       WHERE session_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2
+     ) recent
+     ORDER BY created_at ASC`,
+    [sessionId, limit]
+  );
+  return result.rows.map(mapChatMessageRow);
+}
+
+/** Count how many user turns a session has had (drives the turn cap). */
+export async function countUserChatMessages(sessionId: string): Promise<number> {
+  const result = await query<{ count: string }>(
+    `SELECT count(*)::int AS count FROM ai_chat_messages
+     WHERE session_id = $1 AND role = 'user'`,
+    [sessionId]
+  );
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+/* ------------------------------------------------------------- chat events */
+
+const CHAT_EVENT_COLUMNS = `
+  id, session_id, user_message_id, assistant_message_id, question,
+  normalized_question, answer_status, model_name, prompt_tokens,
+  completion_tokens, latency_ms, matched_sources, guardrail_flags, created_at
+`;
+
+export type InsertChatEventInput = {
+  sessionId: string;
+  userMessageId?: string | null;
+  assistantMessageId?: string | null;
+  question: string;
+  normalizedQuestion?: string | null;
+  answerStatus: ChatAnswerStatus;
+  modelName?: string | null;
+  promptTokens?: number | null;
+  completionTokens?: number | null;
+  latencyMs?: number | null;
+  matchedSources?: JsonValue[];
+  guardrailFlags?: JsonValue[];
+};
+
+export async function insertChatEvent(
+  input: InsertChatEventInput
+): Promise<ChatEventRecord> {
+  const result = await query(
+    `INSERT INTO ai_chat_events
+       (session_id, user_message_id, assistant_message_id, question,
+        normalized_question, answer_status, model_name, prompt_tokens,
+        completion_tokens, latency_ms, matched_sources, guardrail_flags)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+             COALESCE($11, '[]'::jsonb), COALESCE($12, '[]'::jsonb))
+     RETURNING ${CHAT_EVENT_COLUMNS}`,
+    [
+      input.sessionId,
+      input.userMessageId ?? null,
+      input.assistantMessageId ?? null,
+      input.question,
+      input.normalizedQuestion ?? null,
+      input.answerStatus,
+      input.modelName ?? null,
+      input.promptTokens ?? null,
+      input.completionTokens ?? null,
+      input.latencyMs ?? null,
+      input.matchedSources ? JSON.stringify(input.matchedSources) : null,
+      input.guardrailFlags ? JSON.stringify(input.guardrailFlags) : null
+    ]
+  );
+  return mapChatEventRow(result.rows[0]);
 }

@@ -11,6 +11,24 @@ item 4+ should account for it:
 - Embedding model choice (item 4) should be multilingual-capable if this
   ships before a single-language MVP is locked in.
 
+## Future consideration: model routing / budget fallback
+Provider interface (lib/ai/providers/types.ts) already allows swapping or
+adding models via env config. Do NOT build multi-provider routing for
+cost — at current scale it can't pay for itself. If budget protection is
+ever needed: on hitting a monthly spend cap, switch the bot to a static
+"assistant offline — contact us" mode with the WhatsApp CTA, never to a
+weaker model (quality drop is the wrong failure mode for this domain).
+A spend alert in the Anthropic Console covers the practical risk today.
+
+## Future consideration: answer caching at scale
+If chat volume makes model cost material (>~$100/mo), add a semantic
+answer cache before downgrading models: normalize/embed incoming queries,
+serve a stored approved answer on high-similarity match to a previously
+answered question, zero model call. FAQ traffic is highly repetitive —
+expect large hit rates. Cached answers need an admin approval/expiry
+story. This is the primary cost lever; model choice (AI_CHAT_MODEL →
+claude-haiku-4-5, ~3× cheaper) is the secondary one.
+
 ## Known limitation: keyword search vocabulary matching
 The 'simple' FTS config does no stemming, and plainto_tsquery ANDs all
 terms — so exact-lexeme, in-vocabulary phrasing works ("employment pass

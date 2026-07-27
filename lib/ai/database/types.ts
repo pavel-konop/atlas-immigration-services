@@ -121,3 +121,43 @@ export type RetrievalMatchRecord = {
   metadata: JsonObject;
   createdAt: string;
 };
+
+export const chatMessageRoles = ["system", "user", "assistant"] as const;
+export type ChatMessageRole = (typeof chatMessageRoles)[number];
+
+export type ChatSessionRecord = {
+  id: string;
+  refCode: string | null;
+  visitorHash: string | null;
+  sourcePage: string | null;
+  locale: string | null;
+  userAgent: string | null;
+  metadata: JsonObject;
+  createdAt: string;
+  lastSeenAt: string;
+};
+
+export type ChatMessageRecord = {
+  id: string;
+  sessionId: string;
+  role: ChatMessageRole;
+  content: string;
+  createdAt: string;
+};
+
+export type ChatEventRecord = {
+  id: string;
+  sessionId: string;
+  userMessageId: string | null;
+  assistantMessageId: string | null;
+  question: string;
+  normalizedQuestion: string | null;
+  answerStatus: ChatAnswerStatus;
+  modelName: string | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+  latencyMs: number | null;
+  matchedSources: JsonValue[];
+  guardrailFlags: JsonValue[];
+  createdAt: string;
+};

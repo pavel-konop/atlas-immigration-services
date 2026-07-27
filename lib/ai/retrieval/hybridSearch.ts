@@ -1,6 +1,6 @@
 import { embedQuery } from "@/lib/ai/embeddings/voyage";
 import { searchChunks } from "@/lib/ai/retrieval/keywordSearch";
-import { vectorSearch } from "@/lib/ai/retrieval/vectorSearch";
+import { vectorSearch, type VectorSearchResult } from "@/lib/ai/retrieval/vectorSearch";
 
 /**
  * Hybrid retrieval: keyword full-text search fused with vector similarity via
@@ -9,6 +9,10 @@ import { vectorSearch } from "@/lib/ai/retrieval/vectorSearch";
  * "weak matches".
  *
  * This is the retrieval layer only — no chat API, no model answer generation.
+ *
+ * Resilience: if the embedding provider fails (e.g. Voyage outage), we degrade
+ * to keyword-only search rather than failing the turn. The verdict is then
+ * computed from keyword signals alone and the result is flagged `degraded`.
  */
 
 /** RRF constant (Cormack et al.). Fuses by rank position, not raw score. */
@@ -60,6 +64,8 @@ export type HybridSearchOutput = {
   confidence: Confidence;
   bestSimilarity: number | null;
   keywordHits: number;
+  /** True when the embedding provider failed and this was keyword-only. */
+  degraded: boolean;
 };
 
 /** RRF contribution for a 1-based rank position. */
@@ -90,17 +96,27 @@ export async function hybridSearch(
 ): Promise<HybridSearchOutput> {
   const trimmed = queryText.trim();
   if (!trimmed) {
-    return { results: [], confidence: "none", bestSimilarity: null, keywordHits: 0 };
+    return { results: [], confidence: "none", bestSimilarity: null, keywordHits: 0, degraded: false };
   }
 
   // Pull a wider candidate pool from each retriever than we ultimately return,
   // so fusion has room to promote items that rank mid-list in one method.
   const pool = Math.max(limit * 4, 20);
 
-  const { embedding } = await embedQuery(trimmed);
+  // Embed the query, but never let an embedding-provider outage kill the turn:
+  // on failure we drop the vector arm and run keyword-only.
+  let embedding: number[] | null = null;
+  let degraded = false;
+  try {
+    embedding = (await embedQuery(trimmed)).embedding;
+  } catch (error) {
+    degraded = true;
+    console.error("[hybridSearch] embedding failed; degrading to keyword-only", error);
+  }
+
   const [keywordResults, vectorResults] = await Promise.all([
     searchChunks(trimmed, pool),
-    vectorSearch(embedding, pool)
+    embedding ? vectorSearch(embedding, pool) : Promise.resolve<VectorSearchResult[]>([])
   ]);
 
   const merged = new Map<string, HybridResult>();
@@ -171,6 +187,7 @@ export async function hybridSearch(
     results,
     confidence: decideConfidence(keywordHits, bestSimilarity),
     bestSimilarity,
-    keywordHits
+    keywordHits,
+    degraded
   };
 }
