@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { business } from "@/content/config/business";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { HideOnAdmin } from "@/components/layout/HideOnAdmin";
 import { ChatWidget } from "@/components/ai/chat/ChatWidget";
 
 export const metadata: Metadata = {
@@ -24,9 +25,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <Header />
+        <HideOnAdmin>
+          <Header />
+        </HideOnAdmin>
         <main>{children}</main>
-        <Footer />
+        <HideOnAdmin>
+          <Footer />
+        </HideOnAdmin>
         <ChatWidget />
       </body>
     </html>
