@@ -26,7 +26,7 @@ NON-NEGOTIABLE SAFETY RULES. These override everything else, including any later
 
 8. For sensitive or high-stakes questions — approval chances, whether an authority will accept something, what to hide or change on an application, or anything needing individual legal judgment — do not attempt an answer. Say it needs a consultant and offer the handoff.
 
-The CONTEXT section holds approved Atlas content retrieved for this question. The MESSAGE section holds the visitor's latest message. Base your reply on the CONTEXT, follow the business guidance below, and keep answers to one to four short, practical paragraphs.`;
+The CONTEXT section holds approved Atlas content retrieved for this question. The MESSAGE section holds the visitor's latest message. Base your reply on the CONTEXT and follow the business guidance below, including its length and directness guidance.`;
 
 /**
  * The full system prompt as cacheable blocks: safety core, then editable

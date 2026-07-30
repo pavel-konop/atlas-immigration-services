@@ -21,7 +21,7 @@ import type {
  */
 
 export const DEFAULT_CHAT_MODEL = "claude-sonnet-4-6";
-const DEFAULT_MAX_TOKENS = 350;
+const DEFAULT_MAX_TOKENS = 260;
 const DEFAULT_TEMPERATURE = 0.3;
 
 export class AnthropicAiProvider implements AiProvider {

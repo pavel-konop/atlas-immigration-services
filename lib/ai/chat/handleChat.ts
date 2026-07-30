@@ -50,6 +50,8 @@ export type ChatTurnResult = {
   confidence: "strong" | "weak" | "none";
   sources: ChatSource[];
   cta?: ChatCta;
+  /** True once the turn cap is reached — the client should end the conversation. */
+  closed: boolean;
 };
 
 const whatsappCta: ChatCta = {
@@ -150,7 +152,8 @@ export async function handleChatTurn(input: ChatTurnInput): Promise<ChatTurnResu
       reply: sessionCappedReply,
       confidence: "none",
       sources: [],
-      cta: whatsappCta
+      cta: whatsappCta,
+      closed: true
     };
   }
 
@@ -283,7 +286,9 @@ export async function handleChatTurn(input: ChatTurnInput): Promise<ChatTurnResu
     confidence: search.confidence,
     // On provider failure, surface at most 3 of the already-computed sources.
     sources: providerFailed ? sources.slice(0, 3) : sources,
-    cta
+    cta,
+    // This turn reaches the cap when it is the final allowed turn or beyond.
+    closed: currentTurn >= MAX_TURNS
   };
 }
 
