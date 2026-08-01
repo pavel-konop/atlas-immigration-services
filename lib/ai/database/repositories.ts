@@ -556,6 +556,26 @@ export async function mergeChatSessionMetadata(
   );
 }
 
+/**
+ * Record a CTA click for a session (analytics beacon). Deliberately narrow:
+ * matches only an existing, recent session; writes just a boolean + a
+ * server-generated timestamp into metadata; idempotent (the first click's
+ * timestamp is kept). Nothing from the request other than the session id is
+ * stored. Returns whether a session matched.
+ */
+export async function recordCtaClick(id: string, withinHours = 24): Promise<boolean> {
+  const result = await query(
+    `UPDATE ai_chat_sessions
+     SET metadata = metadata
+       || jsonb_build_object('ctaClicked', true)
+       || jsonb_build_object('ctaClickedAt', COALESCE(metadata->>'ctaClickedAt', now()::text))
+     WHERE id = $1 AND last_seen_at > now() - ($2 || ' hours')::interval
+     RETURNING id`,
+    [id, String(withinHours)]
+  );
+  return result.rowCount === 1;
+}
+
 /* ----------------------------------------------------------- chat messages */
 
 const CHAT_MESSAGE_COLUMNS = `id, session_id, role, content, created_at`;

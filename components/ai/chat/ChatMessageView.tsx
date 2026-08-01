@@ -1,14 +1,15 @@
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { MiniMarkdown } from "./miniMarkdown";
-import { whatsappHrefWithRef, type ChatUiMessage } from "./useChatSession";
+import { reportCtaClick, whatsappHrefWithRef, type ChatUiMessage } from "./useChatSession";
 
 type Props = {
   message: ChatUiMessage;
   refCode: string | null;
+  sessionId: string | null;
 };
 
-export function ChatMessageView({ message, refCode }: Props) {
+export function ChatMessageView({ message, refCode, sessionId }: Props) {
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -60,6 +61,7 @@ export function ChatMessageView({ message, refCode }: Props) {
               href={ctaHref}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={cta.type === "whatsapp" ? () => reportCtaClick(sessionId) : undefined}
               className={cn(
                 "inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-atlas-gold px-4 py-2.5",
                 "text-sm font-semibold text-atlas-navy shadow-gold transition hover:bg-atlas-amber"

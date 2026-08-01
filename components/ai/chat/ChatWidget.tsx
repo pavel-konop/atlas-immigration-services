@@ -52,6 +52,7 @@ export function ChatWidget() {
           error={chat.error}
           closed={chat.closed}
           refCode={chat.refCode}
+          sessionId={chat.sessionId}
           onSend={chat.send}
           onRetry={chat.retry}
           onReset={chat.reset}

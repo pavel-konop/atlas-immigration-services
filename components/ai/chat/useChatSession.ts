@@ -47,6 +47,7 @@ export function useChatSession() {
   const [error, setError] = useState<string | null>(null);
   const [closed, setClosed] = useState(false);
   const [refCode, setRefCode] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const sessionIdRef = useRef<string | null>(null);
   const lastFailedRef = useRef<string | null>(null);
@@ -64,6 +65,7 @@ export function useChatSession() {
       const saved = JSON.parse(raw) as { sessionId?: string; refCode?: string; closed?: boolean };
       sessionIdRef.current = saved.sessionId ?? null;
       /* eslint-disable react-hooks/set-state-in-effect */
+      setSessionId(saved.sessionId ?? null);
       setRefCode(saved.refCode ?? null);
       if (saved.closed) setClosed(true);
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -98,6 +100,7 @@ export function useChatSession() {
       }
 
       sessionIdRef.current = data.sessionId;
+      setSessionId(data.sessionId);
       setRefCode(data.refCode);
       setMessages((prev) => [
         ...prev,
@@ -145,10 +148,34 @@ export function useChatSession() {
     lastFailedRef.current = null;
     setMessages([]);
     setRefCode(null);
+    setSessionId(null);
     setClosed(false);
     setError(null);
     setStatus("idle");
   }, []);
 
-  return { messages, status, error, closed, refCode, send, retry, reset };
+  return { messages, status, error, closed, refCode, sessionId, send, retry, reset };
+}
+
+/**
+ * Fire-and-forget CTA-click beacon. Uses sendBeacon (or a keepalive fetch
+ * fallback) so it never blocks the WhatsApp link the user just tapped.
+ */
+export function reportCtaClick(sessionId: string | null): void {
+  if (!sessionId) return;
+  const payload = JSON.stringify({ sessionId });
+  try {
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      navigator.sendBeacon("/api/ai/chat/cta-click", payload);
+      return;
+    }
+  } catch {
+    // fall through to fetch
+  }
+  void fetch("/api/ai/chat/cta-click", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: payload,
+    keepalive: true
+  }).catch(() => {});
 }

@@ -6,6 +6,7 @@ import { business } from "@/content/config/business";
 import { cn } from "@/lib/utils/cn";
 import { ChatMessageView } from "./ChatMessageView";
 import {
+  reportCtaClick,
   whatsappHrefWithRef,
   type ChatStatus,
   type ChatUiMessage
@@ -20,6 +21,7 @@ type Props = {
   error: string | null;
   closed: boolean;
   refCode: string | null;
+  sessionId: string | null;
   onSend: (text: string) => void;
   onRetry: () => void;
   onReset: () => void;
@@ -49,6 +51,7 @@ export function ChatPanel({
   error,
   closed,
   refCode,
+  sessionId,
   onSend,
   onRetry,
   onReset,
@@ -119,7 +122,7 @@ export function ChatPanel({
         )}
 
         {messages.map((message) => (
-          <ChatMessageView key={message.id} message={message} refCode={refCode} />
+          <ChatMessageView key={message.id} message={message} refCode={refCode} sessionId={sessionId} />
         ))}
 
         {status === "sending" && <TypingIndicator />}
@@ -152,6 +155,7 @@ export function ChatPanel({
             href={whatsappHrefWithRef(business.whatsappHref, refCode)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => reportCtaClick(sessionId)}
             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-atlas-gold px-4 py-2.5 text-sm font-semibold text-atlas-navy shadow-gold transition hover:bg-atlas-amber"
           >
             Message Atlas on WhatsApp
