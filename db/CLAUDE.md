@@ -53,6 +53,11 @@ so do not edit it expecting changes to appear on the live site.
   a table that already has any rows (safe to re-run; never clobbers real edits).
 - Saves are concurrency-checked (editor sends its base version; a stale save is
   rejected 409). The admin Content page has a version-history + restore UI.
+- Image uploads store resolved public URLs (not storage keys) in site content.
+  A future storage-provider change requires a one-time URL rewrite across
+  content versions — small, scripted, but real. Local-driver URLs
+  (`/uploads/...`) are host-relative and portable; Blob URLs are
+  provider-absolute.
 
 # Atlas AI Database — Context
 
