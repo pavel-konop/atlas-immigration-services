@@ -10,9 +10,9 @@ export type { StorageAdapter };
  * see lib/storage/types.ts for how keys/URLs stay portable across the swap.
  */
 export function getStorageAdapter(): StorageAdapter {
-  const driver = process.env.STORAGE_DRIVER || "local";
+  const driver = (process.env.STORAGE_DRIVER ?? "").trim();
   if (driver === "vercel-blob") return vercelBlobStorageAdapter;
-  if (driver !== "local") {
+  if (driver !== "" && driver !== "local") {
     console.warn(`[storage] Unknown STORAGE_DRIVER "${driver}" — falling back to local.`);
   }
   return localStorageAdapter;
