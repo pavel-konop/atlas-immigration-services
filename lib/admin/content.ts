@@ -1,18 +1,125 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { faqs as fallbackFaqs } from "@/content/faqs";
+import siteContentSeed from "@/content/admin/site-content.json";
+import { isDatabaseConfigured } from "@/lib/ai/database/client";
+import {
+  getContentVersion,
+  getCurrentContentRow,
+  insertContentVersion,
+  listContentVersions,
+  type ContentVersionMeta
+} from "./contentStore";
 import type { FAQItem, FeedbackItem, InsightItem, PhotoItem, ShowcaseItem, ShowcaseReference, SiteContent } from "@/types/admin-content";
 
-const contentPath = path.join(process.cwd(), "content/admin/site-content.json");
+/**
+ * Site content is stored in Postgres (`site_content_versions`, newest = current).
+ * The bundled JSON is only a seed/fallback, no longer the runtime source of truth.
+ */
 
-export async function getSiteContent(): Promise<SiteContent> {
-  const file = await fs.readFile(contentPath, "utf8");
-  return normalizeSiteContent(JSON.parse(file) as Partial<SiteContent>);
+export const SITE_CONTENT_TAG = "site-content";
+
+export type { ContentVersionMeta };
+
+export type SaveSiteContentResult =
+  | { ok: true; version: number; content: SiteContent }
+  | { ok: false; currentVersion: number };
+
+/** Raw current document from the DB, or null (unconfigured / empty / read error). */
+async function loadCurrentDocRaw(): Promise<SiteContent | null> {
+  if (!isDatabaseConfigured()) return null;
+  try {
+    return (await getCurrentContentRow())?.content ?? null;
+  } catch {
+    return null;
+  }
 }
 
-export async function saveSiteContent(content: SiteContent) {
-  const normalized = normalizeSiteContent(content);
-  await fs.writeFile(contentPath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
+// Public reads are served from Next's Data Cache (tag-invalidated on save), so
+// page renders don't hit Postgres on every request.
+const loadCurrentDocCached = unstable_cache(loadCurrentDocRaw, ["site-content-current"], {
+  tags: [SITE_CONTENT_TAG],
+  revalidate: 300
+});
+
+async function loadCurrentDoc(): Promise<SiteContent | null> {
+  try {
+    return await loadCurrentDocCached();
+  } catch {
+    // unstable_cache can't run outside a Next request context (e.g. the CLI
+    // indexer) — fall back to an uncached read.
+    return await loadCurrentDocRaw();
+  }
+}
+
+function invalidateContentCache() {
+  try {
+    // Next 16 requires a cache profile; "max" purges the tag on demand.
+    revalidateTag(SITE_CONTENT_TAG, "max");
+  } catch {
+    // revalidateTag is a no-op / throws outside a request context; ignore.
+  }
+}
+
+/** Current site content (cached DB read; falls back to the bundled JSON seed). */
+export async function getSiteContent(): Promise<SiteContent> {
+  const doc = await loadCurrentDoc();
+  return normalizeSiteContent((doc ?? (siteContentSeed as Partial<SiteContent>)) as Partial<SiteContent>);
+}
+
+/** Unconditional save (last-write-wins) — preserved for interface compatibility. */
+export async function saveSiteContent(content: SiteContent): Promise<void> {
+  await insertContentVersion({ content: normalizeSiteContent(content), author: "admin" });
+  invalidateContentCache();
+}
+
+/** Fresh current version + content for the admin editor (uncached, for an accurate concurrency base). */
+export async function getCurrentSiteContentVersion(): Promise<{ version: number; content: SiteContent } | null> {
+  if (!isDatabaseConfigured()) return null;
+  const row = await getCurrentContentRow();
+  return row ? { version: row.version, content: normalizeSiteContent(row.content) } : null;
+}
+
+/** Concurrency-checked save: rejects when the store moved past `baseVersion`. */
+export async function saveSiteContentVersion(input: {
+  content: SiteContent;
+  baseVersion: number;
+  note?: string | null;
+}): Promise<SaveSiteContentResult> {
+  const normalized = normalizeSiteContent(input.content);
+  const result = await insertContentVersion({
+    content: normalized,
+    baseVersion: input.baseVersion,
+    note: input.note ?? null,
+    author: "admin"
+  });
+  if (!result.ok) return result;
+  invalidateContentCache();
+  return { ok: true, version: result.version, content: normalized };
+}
+
+export async function listSiteContentVersions(limit = 100): Promise<ContentVersionMeta[]> {
+  if (!isDatabaseConfigured()) return [];
+  return listContentVersions(limit);
+}
+
+/** Write a past version's document back as a new version. */
+export async function restoreSiteContentVersion(
+  version: number
+): Promise<
+  | { ok: true; version: number; content: SiteContent }
+  | { ok: false; notFound: boolean }
+> {
+  const doc = await getContentVersion(version);
+  if (!doc) return { ok: false, notFound: true };
+  const normalized = normalizeSiteContent(doc);
+  const result = await insertContentVersion({
+    content: normalized,
+    note: `Restored from v${version}`,
+    author: "admin"
+  });
+  if (!result.ok) return { ok: false, notFound: false };
+  invalidateContentCache();
+  return { ok: true, version: result.version, content: normalized };
 }
 
 export function mergeServiceOverride<T extends { slug: string }>(service: T, content: SiteContent): T {

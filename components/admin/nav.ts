@@ -10,8 +10,8 @@ export type AdminNavItem = {
 export const adminNav: AdminNavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Content", href: "/admin/content", icon: FileText },
-  { label: "Chats", href: "/admin/chats", icon: MessagesSquare, soon: true },
-  { label: "Knowledge", href: "/admin/knowledge", icon: BookOpen, soon: true }
+  { label: "Chats", href: "/admin/chats", icon: MessagesSquare },
+  { label: "Knowledge", href: "/admin/knowledge", icon: BookOpen }
 ];
 
 /** Active when the path equals the item or is nested under it (but /admin is exact). */

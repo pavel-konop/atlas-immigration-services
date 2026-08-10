@@ -19,8 +19,9 @@ import {
   ShowcaseSection,
   type SectionProps
 } from "./sections";
+import { HistorySection } from "./HistorySection";
 
-type SectionId = "showcase" | "photos" | "feedback" | "articles" | "faqs" | "json";
+type SectionId = "showcase" | "photos" | "feedback" | "articles" | "faqs" | "json" | "history";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "showcase", label: "Showcase" },
@@ -28,7 +29,8 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "feedback", label: "Feedback" },
   { id: "articles", label: "Articles" },
   { id: "faqs", label: "FAQs" },
-  { id: "json", label: "Advanced JSON" }
+  { id: "json", label: "Advanced JSON" },
+  { id: "history", label: "History" }
 ];
 
 export function ContentEditor() {
@@ -43,6 +45,8 @@ export function ContentEditor() {
   const [active, setActive] = useState<SectionId>("showcase");
   const [jsonDraft, setJsonDraft] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
+  const [version, setVersion] = useState(0);
+  const [conflict, setConflict] = useState(false);
 
   const dirty = useMemo(
     () => Boolean(content && saved && JSON.stringify(content) !== JSON.stringify(saved)),
@@ -65,7 +69,7 @@ export function ContentEditor() {
         handleSessionExpiry();
         return;
       }
-      const data = (await res.json().catch(() => null)) as { content?: SiteContent } | null;
+      const data = (await res.json().catch(() => null)) as { content?: SiteContent; version?: number } | null;
       if (!res.ok || !data?.content) {
         setLoadError("Could not load content.");
         setLoading(false);
@@ -73,6 +77,8 @@ export function ContentEditor() {
       }
       setContent(data.content);
       setSaved(data.content);
+      setVersion(data.version ?? 0);
+      setConflict(false);
       setLoading(false);
     } catch {
       setLoadError("Could not reach the server.");
@@ -133,21 +139,32 @@ export function ContentEditor() {
       const res = await fetch("/api/admin/content", {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content, baseVersion: version })
       });
       if (res.status === 401) {
         handleSessionExpiry();
         return;
       }
-      const data = (await res.json().catch(() => null)) as { content?: SiteContent; message?: string } | null;
-      if (!res.ok || !data?.content) {
+      const data = (await res.json().catch(() => null)) as
+        | { content?: SiteContent; version?: number; message?: string }
+        | null;
+      if (res.status === 409) {
+        // Someone saved a newer version since this editor loaded.
+        setConflict(true);
+        toast.push("error", data?.message ?? "Someone else changed this content.");
+        setSaving(false);
+        return;
+      }
+      if (!res.ok || !data?.content || typeof data.version !== "number") {
         toast.push("error", data?.message ?? "Save failed.");
         setSaving(false);
         return;
       }
-      // Adopt the server-normalized content so the editor matches what's on disk.
+      // Adopt the server-normalized content + new version as the concurrency base.
       setContent(data.content);
       setSaved(data.content);
+      setVersion(data.version);
+      setConflict(false);
       if (active === "json") setJsonDraft(JSON.stringify(data.content, null, 2));
       toast.push("success", "Saved. Public pages now read the updated content.");
     } catch {
@@ -174,6 +191,18 @@ export function ContentEditor() {
           </>
         }
       />
+
+      {conflict && (
+        <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Someone else changed this content since you loaded it. Reload to get the latest version — your
+            unsaved edits here will be lost.
+          </span>
+          <Button variant="secondary" size="sm" onClick={() => void load()} className="self-start">
+            Reload latest
+          </Button>
+        </div>
+      )}
 
       {loading ? (
         <LoadingState label="Loading content…" />
@@ -213,6 +242,18 @@ export function ContentEditor() {
           {active === "faqs" && <FaqSection content={content} update={update} />}
           {active === "json" && (
             <AdvancedJsonSection draft={jsonDraft} parseError={jsonError} onDraftChange={onJsonDraftChange} />
+          )}
+          {active === "history" && (
+            <HistorySection
+              currentVersion={version}
+              onSessionExpiry={handleSessionExpiry}
+              onRestored={(restoredContent, restoredVersion) => {
+                setContent(restoredContent);
+                setSaved(restoredContent);
+                setVersion(restoredVersion);
+                setConflict(false);
+              }}
+            />
           )}
         </>
       ) : null}

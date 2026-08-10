@@ -38,6 +38,22 @@ design for item 3's scope. Item 4 (embeddings) + item 5 (hybrid retrieval)
 are specifically meant to close this gap — don't try to fix it by
 loosening to OR-matching or changing the FTS config in isolation.
 
+## Site content is DB-backed and versioned (not the JSON file)
+As of migration 0004, admin-managed site content lives in Postgres
+(`site_content_versions`, insert-only; highest `version` is current). This was
+required because Vercel's filesystem is read-only, so the old file-write store
+failed in production. `content/admin/site-content.json` is kept in the repo
+**only as the seed/fallback source** — it is NOT the runtime source of truth,
+so do not edit it expecting changes to appear on the live site.
+- `lib/admin/content.ts` keeps its interface: `getSiteContent()` reads the
+  current DB version (cached via `unstable_cache`, tag `site-content`,
+  invalidated on save) and falls back to the bundled JSON when the DB is
+  unconfigured or unseeded.
+- `npm run content:seed` seeds the JSON as version 1. It refuses to run against
+  a table that already has any rows (safe to re-run; never clobbers real edits).
+- Saves are concurrency-checked (editor sends its base version; a stale save is
+  rejected 409). The admin Content page has a version-history + restore UI.
+
 # Atlas AI Database — Context
 
 Scope: this file applies when working inside `db/`, `lib/ai/`, and
@@ -64,13 +80,14 @@ DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/atlas
 npm run db:migrate:ai          # applies the AI foundation migration
 npm run mom:import:dry-run     # preview MOM import, no writes
 npm run mom:import             # run MOM import for real
+npm run content:seed           # seed site content as v1 (refuses a non-empty table)
 ```
 
 ## Tables
 `ai_content_intake`, `ai_content_processing_jobs`, `ai_knowledge_drafts`,
 `ai_knowledge_documents`, `ai_knowledge_chunks`, `ai_chat_sessions`,
 `ai_chat_messages`, `ai_chat_events`, `ai_chat_retrieval_matches`,
-`ai_feedback`, `ai_reindex_jobs`
+`ai_feedback`, `ai_reindex_jobs`, `site_content_versions`
 
 ## Pipeline — do not skip or shortcut steps
 1. Owner provides raw content → stored in `ai_content_intake`

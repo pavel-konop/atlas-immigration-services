@@ -23,10 +23,10 @@ async function runKeyword(queryText: string, limit: number) {
 }
 
 async function runHybrid(queryText: string, limit: number) {
-  const { results, confidence, bestSimilarity, keywordHits } = await hybridSearch(queryText, limit);
+  const { results, confidence, bestSimilarity, keywordHits, degraded } = await hybridSearch(queryText, limit);
   const best = bestSimilarity == null ? "n/a" : bestSimilarity.toFixed(4);
   console.log(
-    `Query: "${queryText}" — hybrid — ${results.length} result(s)\n` +
+    `Query: "${queryText}" — hybrid${degraded ? " (DEGRADED: keyword-only)" : ""} — ${results.length} result(s)\n` +
       `Confidence: ${confidence.toUpperCase()}  (keywordHits ${keywordHits}, bestSimilarity ${best})\n`
   );
   results.forEach((r, i) => {
