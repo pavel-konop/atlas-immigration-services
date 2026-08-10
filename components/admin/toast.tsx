@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode
@@ -45,8 +46,18 @@ export function AdminToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { id, tone, message }]);
   }, []);
 
+  // `push` is already a stable useCallback, but wrapping it in a fresh object
+  // literal on every render (e.g. `value={{ push }}`) would still hand every
+  // consumer a "changed" context value whenever a toast is pushed anywhere —
+  // toasts.length changing re-renders this provider. That new object identity
+  // then cascades: any consumer with `toast` in a useCallback/useEffect
+  // dependency array (e.g. ContentEditor's mount-fetch effect) re-runs,
+  // silently discarding unsaved local state. Memoizing keeps the context
+  // value stable across pushes.
+  const contextValue = useMemo(() => ({ push }), [push]);
+
   return (
-    <ToastContext.Provider value={{ push }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[min(22rem,calc(100vw-2rem))] flex-col gap-2">
         {toasts.map((toast) => (

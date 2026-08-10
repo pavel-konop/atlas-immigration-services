@@ -87,11 +87,19 @@ export function ContentEditor() {
   }, [handleSessionExpiry]);
 
   useEffect(() => {
-    // Fetch content on mount. `load` sets loading/error state — the intended use
-    // of an effect for data fetching (the initial state already shows a loader).
+    // Fetch content exactly once, on mount. Deliberately NOT depending on
+    // `load` here: `load` is a useCallback whose identity can shift if any of
+    // its transitive dependencies do (e.g. a toast pushed anywhere previously
+    // produced a new toast-context value — now fixed at the source in
+    // toast.tsx, but this effect shouldn't rely on that invariant holding
+    // forever). Depending on `load` would re-run this effect and silently
+    // overwrite unsaved local edits with server state. Refetches happen only
+    // explicitly (the "Reload latest" / "Try again" buttons, or after a
+    // save/restore) — never implicitly via a dependency change.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
-  }, [load]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Warn before leaving with unsaved changes.
   useEffect(() => {
