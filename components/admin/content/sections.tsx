@@ -8,6 +8,7 @@ import { Card } from "../Card";
 import { EmptyState } from "../EmptyState";
 import { FeedbackBanner } from "../toast";
 import { NumberField, SelectField, TextField, TextareaField, ToggleField } from "../fields";
+import { ImageUploadField } from "./ImageUploadField";
 import { newFaq, newFeedback, newInsight, newPhoto, slugify } from "./factories";
 
 export type SectionProps = {
@@ -175,9 +176,16 @@ export function PhotosSection({ content, update }: SectionProps) {
             onToggle={() => update((d) => void (d.contentLibrary.photos[index].enabled = !item.enabled))}
             onDelete={() => update((d) => void d.contentLibrary.photos.splice(index, 1))}
           >
-            <div className="grid gap-4 md:grid-cols-2">
+            <ImageUploadField
+              label="Photo"
+              value={item.image}
+              onChange={(v) => update((d) => void (d.contentLibrary.photos[index].image = v))}
+              aspectRatio={2}
+              folder="photos"
+              hint="Cropped to 2:1 for the homepage tile."
+            />
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               <TextField label="ID" value={item.id} onChange={(v) => update((d) => void (d.contentLibrary.photos[index].id = slugify(v)))} />
-              <TextField label="Image path" value={item.image} onChange={(v) => update((d) => void (d.contentLibrary.photos[index].image = v))} />
               <TextField label="Title" value={item.title} onChange={(v) => update((d) => void (d.contentLibrary.photos[index].title = v))} />
               <TextField label="Link" value={item.href} onChange={(v) => update((d) => void (d.contentLibrary.photos[index].href = v))} />
             </div>
@@ -246,11 +254,18 @@ export function ArticlesSection({ content, update }: SectionProps) {
             onToggle={() => update((d) => void (d.contentLibrary.insights[index].enabled = !item.enabled))}
             onDelete={() => update((d) => void d.contentLibrary.insights.splice(index, 1))}
           >
-            <div className="grid gap-4 md:grid-cols-2">
+            <ImageUploadField
+              label="Article image"
+              value={item.image}
+              onChange={(v) => update((d) => void (d.contentLibrary.insights[index].image = v))}
+              aspectRatio={16 / 9}
+              folder="articles"
+              hint="Cropped to 16:9 for the showcase tile."
+            />
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               <TextField label="Slug" value={item.slug} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].slug = slugify(v)))} />
               <TextField label="Date" value={item.date} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].date = v))} />
               <TextField label="Category" value={item.category} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].category = v))} />
-              <TextField label="Image path" value={item.image} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].image = v))} />
             </div>
             <TextField label="Title" value={item.title} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].title = v))} />
             <TextareaField label="Description" value={item.description} onChange={(v) => update((d) => void (d.contentLibrary.insights[index].description = v))} />

@@ -1,5 +1,9 @@
 .DS_Store
 .env
+
+# Local-driver admin uploads (dev/VPS runtime data, not repo content).
+/public/uploads/*
+!/public/uploads/.gitkeep
 .env*.local
 .next
 node_modules
