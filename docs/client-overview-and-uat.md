@@ -7,7 +7,9 @@ Staging site: `STAGING_URL`
 
 ## Part A — What this is
 
-**The website.** Your existing site — About, Services, Insights, FAQ, Contact — plus a small floating chat button in the bottom-right corner of every public page. That button opens the AI assistant.
+The Atlas platform has four parts: a public website, an AI assistant built into it, a WhatsApp handoff for real conversations, and an admin panel to run it all.
+
+**The website.** Six public pages — **Home**, **About**, **Services**, **Insights**, **FAQ**, and **Contact** — covering who Atlas is, what Atlas offers, articles and updates, common questions, and how to get in touch. Every page carries a small floating chat button in the bottom-right corner. That button opens the AI assistant.
 
 **The AI assistant.** It's a chat window that answers visitor questions about Singapore immigration and corporate services, based only on the content already on your website (services, FAQ answers, articles). It's designed to be helpful but careful:
 
